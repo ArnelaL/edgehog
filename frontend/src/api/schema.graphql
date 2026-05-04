@@ -75,10 +75,10 @@ input CampaignCampaignMechanismFileDownloadInput {
   compression: String
 
   """
-  Device-specific field indicating where the file should be stored.
-  Supported values are: storage, streaming, filesystem.
+  Optional ttl for how long to keep the file for on the device, if 0 is forever.
+  Defaults to 0.
   """
-  destinationType: FileDestination
+  ttlSeconds: Int
 
   """
   Optional unix mode for the file (e.g., 0o644 for readable by all, writable by owner).
@@ -93,10 +93,10 @@ input CampaignCampaignMechanismFileDownloadInput {
   groupId: Int
 
   """
-  Optional ttl for how long to keep the file for on the device, if 0 is forever.
-  Defaults to 0.
+  Device-specific field indicating where the file should be stored.
+  Supported values are: storage, streaming, filesystem.
   """
-  ttlSeconds: Int
+  destinationType: FileDestination
 }
 
 "An object representing the properties of a File Download campaign mechanism."
@@ -7447,6 +7447,11 @@ type Channel implements Node {
   ): CampaignConnection!
 }
 
+type campaign_targets_by_campaign_result {
+  created: CampaignTarget
+  updated: CampaignTarget
+}
+
 enum CampaignTargetSortField {
   ID
   STATUS
@@ -8600,6 +8605,12 @@ type RootSubscriptionType {
 
     id: ID!
   ): campaign_result
+  campaignTargetsByCampaign(
+    "A filter to limit the results"
+    filter: CampaignTargetFilterInput
+
+    campaignId: ID!
+  ): campaign_targets_by_campaign_result
   channels(
     "A filter to limit the results"
     filter: ChannelFilterInput

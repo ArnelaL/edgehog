@@ -114,38 +114,31 @@ const CAMPAIGN_UPDATE_SUBSCRIPTION = graphql`
         inProgressTargetCount
         failedTargetCount
         successfulTargetCount
-        campaignTargets {
-          edges {
-            node {
-              id
-              device {
-                id
-                name
-              }
-              status
-              retryCount
-              latestAttempt
-              completionTimestamp
-              deployment {
-                state
-                isReady
-                events(
-                  filter: { type: { eq: ERROR } }
-                  sort: [{ field: INSERTED_AT, order: DESC }]
-                  first: 1
-                ) {
-                  edges {
-                    node {
-                      message
-                      type
-                      insertedAt
-                      addInfo
-                    }
-                  }
-                }
-              }
-            }
-          }
+      }
+    }
+  }
+`;
+
+const CAMPAIGN_TARGETS_UPDATED_SUBSCRIPTION = graphql`
+  subscription UpdateCampaign_campaignTargetsUpdated_Subscription(
+    $campaignId: ID!
+  ) {
+    campaignTargetsByCampaign(campaignId: $campaignId) {
+      updated {
+        id
+        device {
+          id
+          name
+        }
+        status
+        retryCount
+        latestAttempt
+        completionTimestamp
+        otaOperation {
+          status
+          statusProgress
+          statusCode
+          message
         }
       }
     }
@@ -332,67 +325,6 @@ const UpdateCampaignContent = ({
     campaign?.scheduledAtTimestamp
   );
 
-  useSubscription({
-    subscription: CAMPAIGN_UPDATE_SUBSCRIPTION,
-    variables: { id: updateCampaignId },
-    updater: (store) => {
-      const root = store.getRoot();
-      const campaignRoot = root.getLinkedRecord("campaign", {
-        id: updateCampaignId,
-      });
-      if (!campaignRoot) return;
-
-      const campaignTargets = campaignRoot.getLinkedRecord("campaignTargets");
-      const allEdges = campaignTargets?.getLinkedRecords("edges") ?? [];
-
-      const STATUS_CONFIGS = [
-        {
-          status: "SUCCESSFUL",
-          filters: { filter: { status: { eq: "SUCCESSFUL" } } },
-        },
-        {
-          status: "IN_PROGRESS",
-          filters: { filter: { status: { eq: "IN_PROGRESS" } } },
-        },
-        {
-          status: "IDLE",
-          filters: { filter: { status: { eq: "IDLE" } } },
-        },
-        {
-          status: "FAILED",
-          filters: { filter: { status: { eq: "FAILED" } } },
-        },
-      ];
-
-      for (const { status, filters } of STATUS_CONFIGS) {
-        const connection = ConnectionHandler.getConnection(
-          campaignRoot,
-          "DeploymentTargetsTabs_campaignTargets",
-          filters,
-        );
-        if (!connection) continue;
-
-        const nodes = allEdges
-          .map((e) => e?.getLinkedRecord("node"))
-          .filter(
-            (n): n is NonNullable<typeof n> =>
-              Boolean(n) && n?.getValue("status") === status,
-          );
-
-        const newEdges = nodes.map((node) =>
-          ConnectionHandler.createEdge(
-            store,
-            connection,
-            node,
-            "CampaignTargetEdge",
-          ),
-        );
-
-        connection.setLinkedRecords(newEdges, "edges");
-      }
-    },
-  });
-
   if (!campaign) {
     return (
       <Result.NotFound
@@ -481,6 +413,78 @@ const UpdateCampaignPage = () => {
   }, [getCampaign, updateCampaignId]);
 
   useEffect(fetchCampaign, [fetchCampaign]);
+
+  useSubscription({
+    subscription: CAMPAIGN_UPDATE_SUBSCRIPTION,
+    variables: { id: updateCampaignId },
+  });
+
+  useSubscription({
+    subscription: CAMPAIGN_TARGETS_UPDATED_SUBSCRIPTION,
+    variables: { campaignId: updateCampaignId },
+    updater: (store) => {
+      const payload = store.getRootField("campaignTargetsByCampaign");
+      const node = payload?.getLinkedRecord("updated");
+      if (!node) return;
+
+      const root = store.getRoot();
+      const campaignRoot = root.getLinkedRecord("campaign", {
+        id: updateCampaignId,
+      });
+      if (!campaignRoot) return;
+
+      const nodeStatus = node.getValue("status");
+
+      const STATUS_CONFIGS = [
+        {
+          status: "SUCCESSFUL",
+          filters: { filter: { status: { eq: "SUCCESSFUL" } } },
+        },
+        {
+          status: "IN_PROGRESS",
+          filters: { filter: { status: { eq: "IN_PROGRESS" } } },
+        },
+        {
+          status: "IDLE",
+          filters: { filter: { status: { eq: "IDLE" } } },
+        },
+        {
+          status: "FAILED",
+          filters: { filter: { status: { eq: "FAILED" } } },
+        },
+      ];
+
+      for (const { status, filters } of STATUS_CONFIGS) {
+        const connection = ConnectionHandler.getConnection(
+          campaignRoot,
+          "UpdateTargetsTabs_campaignTargets",
+          filters,
+        );
+        if (!connection) continue;
+
+        const existingEdges = connection.getLinkedRecords("edges") ?? [];
+
+        const filteredEdges = existingEdges.filter((edge) => {
+          const edgeNode = edge.getLinkedRecord("node");
+          return edgeNode?.getDataID() !== node.getDataID();
+        });
+
+        if (nodeStatus !== status) {
+          connection.setLinkedRecords(filteredEdges, "edges");
+          continue;
+        }
+
+        const newEdge = ConnectionHandler.createEdge(
+          store,
+          connection,
+          node,
+          "CampaignTargetEdge",
+        );
+
+        connection.setLinkedRecords([newEdge, ...filteredEdges], "edges");
+      }
+    },
+  });
 
   return (
     <Suspense

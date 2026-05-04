@@ -249,63 +249,6 @@ defmodule EdgehogWeb.Schema.Subscriptions.Campaign.CampaignSubscriptionsTest do
 
       refute_push "subscription:data", _payload, 100
     end
-
-    test "receives data on campaign target update", %{
-      socket: socket,
-      tenant: tenant
-    } do
-      campaign =
-        1
-        |> campaign_with_targets_fixture(
-          tenant: tenant,
-          mechanism_type: :deployment_deploy
-        )
-        |> Ash.load!(:campaign_targets)
-
-      [campaign_target] = campaign.campaign_targets
-
-      assert campaign_target.status == :idle
-
-      campaign_updated_query = """
-      subscription CampaignUpdated($id: ID!) {
-        campaign(id: $id) {
-          updated {
-            id
-            name
-            status
-            campaignTargets{
-              edges{
-                node {
-                  id
-                  status
-                }
-              }
-            }
-          }
-        }
-      }
-      """
-
-      subscribe(
-        socket,
-        query: campaign_updated_query,
-        variables: %{
-          "id" => AshGraphql.Resource.encode_relay_id(campaign)
-        }
-      )
-
-      Campaigns.mark_target_as_successful!(campaign_target, tenant: tenant)
-
-      assert_push "subscription:data", push
-
-      assert_updated("campaign", campaign_data, push)
-
-      assert campaign_data["id"] == AshGraphql.Resource.encode_relay_id(campaign)
-
-      [%{"node" => campaign_target}] = campaign_data["campaignTargets"]["edges"]
-
-      assert campaign_target["status"] == "SUCCESSFUL"
-    end
   end
 
   defp subscribe(socket, opts \\ []) do

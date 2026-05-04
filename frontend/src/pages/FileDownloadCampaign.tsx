@@ -115,26 +115,31 @@ const CAMPAIGN_UPDATE_SUBSCRIPTION = graphql`
         inProgressTargetCount
         failedTargetCount
         successfulTargetCount
-        campaignTargets {
-          edges {
-            node {
-              id
-              device {
-                id
-                name
-              }
-              status
-              retryCount
-              latestAttempt
-              completionTimestamp
-              fileDownloadRequest {
-                status
-                progressPercentage
-                responseCode
-                responseMessage
-              }
-            }
-          }
+      }
+    }
+  }
+`;
+
+const CAMPAIGN_TARGETS_UPDATED_SUBSCRIPTION = graphql`
+  subscription FileDownloadCampaign_campaignTargetsUpdated_Subscription(
+    $campaignId: ID!
+  ) {
+    campaignTargetsByCampaign(campaignId: $campaignId) {
+      updated {
+        id
+        device {
+          id
+          name
+        }
+        status
+        retryCount
+        latestAttempt
+        completionTimestamp
+        fileDownloadRequest {
+          status
+          progressPercentage
+          responseCode
+          responseMessage
         }
       }
     }
@@ -323,67 +328,6 @@ const FileDownloadCampaignContent = ({
     campaign?.scheduledAtTimestamp
   );
 
-  useSubscription({
-    subscription: CAMPAIGN_UPDATE_SUBSCRIPTION,
-    variables: { id: fileDownloadCampaignId },
-    updater: (store) => {
-      const root = store.getRoot();
-      const campaignRoot = root.getLinkedRecord("campaign", {
-        id: fileDownloadCampaignId,
-      });
-      if (!campaignRoot) return;
-
-      const campaignTargets = campaignRoot.getLinkedRecord("campaignTargets");
-      const allEdges = campaignTargets?.getLinkedRecords("edges") ?? [];
-
-      const statusConfigs = [
-        {
-          status: "SUCCESSFUL",
-          filters: { filter: { status: { eq: "SUCCESSFUL" } } },
-        },
-        {
-          status: "IN_PROGRESS",
-          filters: { filter: { status: { eq: "IN_PROGRESS" } } },
-        },
-        {
-          status: "IDLE",
-          filters: { filter: { status: { eq: "IDLE" } } },
-        },
-        {
-          status: "FAILED",
-          filters: { filter: { status: { eq: "FAILED" } } },
-        },
-      ];
-
-      for (const { status, filters } of statusConfigs) {
-        const connection = ConnectionHandler.getConnection(
-          campaignRoot,
-          "FileDownloadTargetsTabs_campaignTargets",
-          filters,
-        );
-        if (!connection) continue;
-
-        const nodes = allEdges
-          .map((e) => e?.getLinkedRecord("node"))
-          .filter(
-            (n): n is NonNullable<typeof n> =>
-              Boolean(n) && n?.getValue("status") === status,
-          );
-
-        const newEdges = nodes.map((node) =>
-          ConnectionHandler.createEdge(
-            store,
-            connection,
-            node,
-            "CampaignTargetEdge",
-          ),
-        );
-
-        connection.setLinkedRecords(newEdges, "edges");
-      }
-    },
-  });
-
   if (!campaign) {
     return (
       <Result.NotFound
@@ -477,6 +421,78 @@ const FileDownloadCampaignPage = () => {
   }, [getCampaign, fileDownloadCampaignId]);
 
   useEffect(fetchCampaign, [fetchCampaign]);
+
+  useSubscription({
+    subscription: CAMPAIGN_UPDATE_SUBSCRIPTION,
+    variables: { id: fileDownloadCampaignId },
+  });
+
+  useSubscription({
+    subscription: CAMPAIGN_TARGETS_UPDATED_SUBSCRIPTION,
+    variables: { campaignId: fileDownloadCampaignId },
+    updater: (store) => {
+      const payload = store.getRootField("campaignTargetsByCampaign");
+      const node = payload?.getLinkedRecord("updated");
+      if (!node) return;
+
+      const root = store.getRoot();
+      const campaignRoot = root.getLinkedRecord("campaign", {
+        id: fileDownloadCampaignId,
+      });
+      if (!campaignRoot) return;
+
+      const nodeStatus = node.getValue("status");
+
+      const STATUS_CONFIGS = [
+        {
+          status: "SUCCESSFUL",
+          filters: { filter: { status: { eq: "SUCCESSFUL" } } },
+        },
+        {
+          status: "IN_PROGRESS",
+          filters: { filter: { status: { eq: "IN_PROGRESS" } } },
+        },
+        {
+          status: "IDLE",
+          filters: { filter: { status: { eq: "IDLE" } } },
+        },
+        {
+          status: "FAILED",
+          filters: { filter: { status: { eq: "FAILED" } } },
+        },
+      ];
+
+      for (const { status, filters } of STATUS_CONFIGS) {
+        const connection = ConnectionHandler.getConnection(
+          campaignRoot,
+          "FileDownloadTargetsTabs_campaignTargets",
+          filters,
+        );
+        if (!connection) continue;
+
+        const existingEdges = connection.getLinkedRecords("edges") ?? [];
+
+        const filteredEdges = existingEdges.filter((edge) => {
+          const edgeNode = edge.getLinkedRecord("node");
+          return edgeNode?.getDataID() !== node.getDataID();
+        });
+
+        if (nodeStatus !== status) {
+          connection.setLinkedRecords(filteredEdges, "edges");
+          continue;
+        }
+
+        const newEdge = ConnectionHandler.createEdge(
+          store,
+          connection,
+          node,
+          "CampaignTargetEdge",
+        );
+
+        connection.setLinkedRecords([newEdge, ...filteredEdges], "edges");
+      }
+    },
+  });
 
   return (
     <Suspense

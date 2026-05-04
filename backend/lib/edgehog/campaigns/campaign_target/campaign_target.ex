@@ -35,7 +35,6 @@ defmodule Edgehog.Campaigns.CampaignTarget do
   alias Edgehog.Campaigns.CampaignMechanism.FileDownload
   alias Edgehog.Campaigns.CampaignTarget
   alias Edgehog.Campaigns.CampaignTarget.Changes
-  alias Edgehog.Campaigns.CampaignTarget.Changes.TriggerCampaignSubscription
   alias Edgehog.Containers.Release
   alias Edgehog.Files.File
 
@@ -45,10 +44,26 @@ defmodule Edgehog.Campaigns.CampaignTarget do
 
   graphql do
     type :campaign_target
+
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :campaign_targets_by_campaign do
+        action_types [:create, :update]
+        read_action :read_by_campaign
+        relay_id_translations campaign_id: :campaign
+      end
+    end
   end
 
   actions do
     defaults [:read]
+
+    read :read_by_campaign do
+      argument :campaign_id, :uuid, allow_nil?: false
+
+      get_by :campaign_id
+    end
 
     read :next_valid_target do
       description """
@@ -176,7 +191,6 @@ defmodule Edgehog.Campaigns.CampaignTarget do
       require_atomic? false
 
       change set_attribute(:status, :in_progress)
-      change TriggerCampaignSubscription
     end
 
     update :mark_as_failed do
@@ -188,7 +202,6 @@ defmodule Edgehog.Campaigns.CampaignTarget do
 
       change set_attribute(:completion_timestamp, arg(:completion_timestamp))
       change set_attribute(:status, :failed)
-      change TriggerCampaignSubscription
     end
 
     update :mark_as_successful do
@@ -200,7 +213,6 @@ defmodule Edgehog.Campaigns.CampaignTarget do
 
       change set_attribute(:completion_timestamp, arg(:completion_timestamp))
       change set_attribute(:status, :successful)
-      change TriggerCampaignSubscription
     end
 
     update :increase_retry_count do
@@ -211,8 +223,6 @@ defmodule Edgehog.Campaigns.CampaignTarget do
       require_atomic? false
 
       accept [:latest_attempt]
-
-      change TriggerCampaignSubscription
     end
 
     # Deployment related updates
@@ -234,7 +244,6 @@ defmodule Edgehog.Campaigns.CampaignTarget do
 
       change set_attribute(:status, :in_progress)
       change Changes.LinkDeployment
-      change TriggerCampaignSubscription
     end
 
     update :set_deployment do
@@ -248,7 +257,6 @@ defmodule Edgehog.Campaigns.CampaignTarget do
       require_atomic? false
 
       change set_attribute(:status, :in_progress)
-      change TriggerCampaignSubscription
     end
 
     # Firmware upgrade related updates

@@ -180,12 +180,6 @@ defmodule Edgehog.Campaigns.Campaign do
       change Changes.StartExecution
     end
 
-    update :trigger_subscription do
-      description """
-      This is a nop action used only to trigger subscriptions.
-      """
-    end
-
     destroy :destroy do
       description "Deletes a Campaign"
       primary? true
