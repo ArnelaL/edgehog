@@ -97,7 +97,10 @@ const columns = [
     cell: ({ row, getValue }) => (
       <Link
         route={Route.application}
-        params={{ applicationId: row.original.release?.application?.id || "" }}
+        params={{
+          applicationId: row.original.release?.application?.id || "",
+          applicationTab: "releases-tab",
+        }}
       >
         {getValue()}
       </Link>

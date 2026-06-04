@@ -46,6 +46,7 @@ import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import type { FileDownloadCampaignOutputData } from "@/forms/CreateFileDownloadCampaign";
 import CreateFileDownloadCampaignForm from "@/forms/CreateFileDownloadCampaign";
 import { Link, Route, useNavigate } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const GET_CREATE_CAMPAIGN_OPTIONS_QUERY = graphql`
   query FileDownloadCampaignCreate_getOptions_Query(
@@ -286,9 +287,11 @@ const FileDownloadCampaignCreatePage = () => {
               }
             />
             <Page.Main>
-              <FileDownloadCampaignWrapper
-                getCreateCampaignOptionsQuery={getCreateCampaignOptionsQuery}
-              />
+              <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+                <FileDownloadCampaignWrapper
+                  getCreateCampaignOptionsQuery={getCreateCampaignOptionsQuery}
+                />
+              </Card>
             </Page.Main>
           </Page>
         )}

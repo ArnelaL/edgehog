@@ -40,6 +40,7 @@ import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const GET_CONTAINERS_QUERY = graphql`
   query Containers_getContainers_Query(
@@ -130,14 +131,7 @@ const ContainersContent = ({ getContainersQuery }: ContainersContentProps) => {
 
   return (
     <Page>
-      <Page.Header
-        title={
-          <FormattedMessage
-            id="pages.Containers.title"
-            defaultMessage="Containers"
-          />
-        }
-      >
+      <Page.Header>
         <Button as={Link} route={Route.containersNew}>
           <FormattedMessage
             id="pages.Containers.createButton"
@@ -146,15 +140,17 @@ const ContainersContent = ({ getContainersQuery }: ContainersContentProps) => {
         </Button>
       </Page.Header>
       <Page.Main>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <ContainersLayoutContainer
-          containersData={containersData}
-          searchText={searchText}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <ContainersLayoutContainer
+            containersData={containersData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

@@ -23,6 +23,7 @@ import type { BatteryTab_batteryStatus$key } from "@/api/__generated__/BatteryTa
 
 import { Tab } from "@/components/Tabs";
 import BatteryTable from "@/components/BatteryTable";
+import { Card } from "react-bootstrap";
 
 const DEVICE_BATTERY_STATUS_FRAGMENT = graphql`
   fragment BatteryTab_batteryStatus on Device {
@@ -44,15 +45,16 @@ const DeviceBatteryTab = ({ deviceRef }: DeviceBatteryTabProps) => {
 
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-battery-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.BatteryTab.title",
         defaultMessage: "Battery",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <BatteryTable deviceRef={device} />
-      </div>
+      </Card>
     </Tab>
   );
 };

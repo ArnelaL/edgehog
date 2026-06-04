@@ -19,7 +19,7 @@
  */
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { Col, Form, Row } from "react-bootstrap";
+import { Card, Col, Form, Row } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage, useIntl } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
@@ -31,7 +31,7 @@ import {
   useQueryLoader,
   useSubscription,
 } from "react-relay/hooks";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 
 import { Application_ReleasesFragment$key } from "@/api/__generated__/Application_ReleasesFragment.graphql";
 import type {
@@ -291,6 +291,11 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
     useState<SelectedRelease | null>(null);
   const { applicationId = "" } = useParams();
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabKeys = ["releases-tab", "devices-tab"];
+
+  const defaultTabKey = searchParams.get("applicationSlug") || tabKeys[0];
+
   return (
     <Page>
       <Page.Header title={application.name}>
@@ -333,26 +338,33 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
         </Form.Group>
 
         <Tabs
-          defaultActiveKey="releases-tab"
+          className="d-flex flex-column flex-grow-1"
+          defaultActiveKey={defaultTabKey}
           tabsOrder={["releases-tab", "devices-tab"]}
+          onChange={(tabKey) =>
+            setSearchParams({ applicationSlug: tabKey }, { replace: true })
+          }
         >
           <Tab
             eventKey="releases-tab"
+            className="pt-3 d-flex flex-column flex-grow-1"
             title={intl.formatMessage({
               id: "pages.Application.releases",
               defaultMessage: "Releases",
             })}
           >
-            <SearchBox
-              className="flex-grow-1 pb-2 pt-2"
-              value={searchText || ""}
-              onChange={setSearchText}
-            />
-            <ReleasesLayoutContainer
-              applicationRef={application}
-              searchText={searchText}
-              onDelete={setReleaseToDelete}
-            />
+            <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+              <SearchBox
+                className="pb-2"
+                value={searchText || ""}
+                onChange={setSearchText}
+              />
+              <ReleasesLayoutContainer
+                applicationRef={application}
+                searchText={searchText}
+                onDelete={setReleaseToDelete}
+              />
+            </Card>
             {releaseToDelete && (
               <DeleteReleaseModal
                 releaseToDelete={releaseToDelete}
@@ -365,12 +377,15 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
 
           <Tab
             eventKey="devices-tab"
+            className="pt-3 d-flex flex-column flex-grow-1"
             title={intl.formatMessage({
               id: "pages.Application.devices",
               defaultMessage: "Devices",
             })}
           >
-            <DevicesLayoutContainer applicationRef={application} />
+            <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+              <DevicesLayoutContainer applicationRef={application} />
+            </Card>
           </Tab>
         </Tabs>
       </Page.Main>

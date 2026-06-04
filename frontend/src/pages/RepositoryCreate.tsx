@@ -32,6 +32,7 @@ import Spinner from "@/components/Spinner";
 import CreateRepositoryForm from "@/forms/CreateRepository";
 import { RepositoryFormData } from "@/forms/validation";
 import { Route, useNavigate } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const CREATE_REPOSITORY_MUTATION = graphql`
   mutation RepositoryCreate_createRepository_Mutation(
@@ -129,10 +130,12 @@ const Repository = () => {
       >
         {errorFeedback}
       </Alert>
-      <CreateRepositoryForm
-        onSubmit={handleCreateRepository}
-        isLoading={isCreatingRepository}
-      />
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 pt-2">
+        <CreateRepositoryForm
+          onSubmit={handleCreateRepository}
+          isLoading={isCreatingRepository}
+        />
+      </Card>
     </>
   );
 };

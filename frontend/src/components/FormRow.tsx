@@ -21,6 +21,8 @@
 import { ReactNode } from "react";
 import { Row, Col, Form } from "react-bootstrap";
 
+import "./FormRow.scss";
+
 type FormRowVariant = "form-group" | "simple-row";
 
 export interface FormRowProps {
@@ -51,8 +53,8 @@ export const FormRow = ({
   className,
   labelClassName,
   valueColClassName,
-  labelCol = 3,
-  valueCol = 9,
+  labelCol = 2,
+  valueCol = 10,
 }: FormRowProps) => {
   if (layout === "simple-row") {
     return (
@@ -68,11 +70,23 @@ export const FormRow = ({
   }
 
   return (
-    <Form.Group as={Row} controlId={id} className={className}>
-      <Form.Label column sm={labelCol} className={labelClassName}>
+    <Form.Group
+      as={Row}
+      controlId={id}
+      className={`form-row-group ${className || ""}`}
+    >
+      <Form.Label
+        column
+        sm={labelCol}
+        className={`form-row-label ${labelClassName || ""}`}
+      >
         {label}
       </Form.Label>
-      <Col sm={valueCol} className={valueColClassName}>
+
+      <Col
+        sm={valueCol}
+        className={`form-row-value ${valueColClassName || ""}`}
+      >
         {children}
       </Col>
     </Form.Group>

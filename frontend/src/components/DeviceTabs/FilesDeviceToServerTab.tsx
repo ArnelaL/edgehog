@@ -49,6 +49,7 @@ import type {
   FileSourceType,
   ManualFileUploadRequestData,
 } from "@/forms/validation";
+import { Card } from "react-bootstrap";
 
 // We use graphql fields below in table columns configuration
 /* eslint-disable relay/unused-fields */
@@ -437,7 +438,7 @@ const FilesDeviceToServerTab = ({
 
   const content = (
     <>
-      <div className="mt-3">
+      <Card className="h-100 border-0 p-3 shadow-sm mb-3">
         <Alert
           show={!!errorFeedback}
           variant="danger"
@@ -458,11 +459,11 @@ const FilesDeviceToServerTab = ({
             isOnline={isOnline}
           />
         </Stack>
-      </div>
+      </Card>
 
       <hr />
 
-      <div className="mt-4">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <h5>
           <FormattedMessage
             id="components.DeviceTabs.FilesDeviceToServerTab.requestHistory"
@@ -471,7 +472,7 @@ const FilesDeviceToServerTab = ({
         </h5>
 
         <FilesDeviceToServerTable requests={fileUploadRequests} />
-      </div>
+      </Card>
     </>
   );
 

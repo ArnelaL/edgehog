@@ -51,6 +51,7 @@ import Tabs, { Tab } from "@/components/Tabs";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const GET_RELEASE_QUERY = graphql`
   query Release_getRelease_Query($releaseId: ID!, $first: Int, $after: String) {
@@ -134,15 +135,16 @@ const SystemModelsTab = ({ release }: SystemModelsTabProps) => {
 
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="system-models-tab"
       title={intl.formatMessage({
         id: "pages.Release.systemModels",
         defaultMessage: "System Models",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <ReleaseSystemModelsTable systemModelsRef={release} />
-      </div>
+      </Card>
     </Tab>
   );
 };
@@ -206,10 +208,12 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
         </Alert>
 
         <Tabs
+          className="pt-3 d-flex flex-column flex-grow-1"
           defaultActiveKey="containers-tab"
           tabsOrder={["containers-tab", "system-models-tab", "devices-tab"]}
         >
           <Tab
+            className="pt-3 d-flex flex-column flex-grow-1"
             eventKey="containers-tab"
             title={intl.formatMessage({
               id: "pages.Release.containers",
@@ -222,13 +226,16 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
           <SystemModelsTab release={release} />
 
           <Tab
+            className="pt-3 d-flex flex-column flex-grow-1"
             eventKey="devices-tab"
             title={intl.formatMessage({
               id: "pages.Release.devices",
               defaultMessage: "Devices",
             })}
           >
-            <ReleaseDevicesLayoutContainer releaseRef={release} />
+            <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+              <ReleaseDevicesLayoutContainer releaseRef={release} />
+            </Card>
           </Tab>
         </Tabs>
       </Page.Main>

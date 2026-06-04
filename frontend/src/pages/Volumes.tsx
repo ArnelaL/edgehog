@@ -40,6 +40,7 @@ import VolumesTable from "@/components/VolumesTable";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const GET_VOLUMES_QUERY = graphql`
   query Volumes_getVolumes_Query(
@@ -126,11 +127,7 @@ const VolumesContent = ({ getVolumesQuery }: VolumesContentProps) => {
 
   return (
     <Page>
-      <Page.Header
-        title={
-          <FormattedMessage id="pages.Volumes.title" defaultMessage="Volumes" />
-        }
-      >
+      <Page.Header>
         <Button as={Link} route={Route.volumesNew}>
           <FormattedMessage
             id="pages.Volumes.createButton"
@@ -139,15 +136,17 @@ const VolumesContent = ({ getVolumesQuery }: VolumesContentProps) => {
         </Button>
       </Page.Header>
       <Page.Main>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <VolumesLayoutContainer
-          volumesData={volumesData}
-          searchText={searchText}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <VolumesLayoutContainer
+            volumesData={volumesData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

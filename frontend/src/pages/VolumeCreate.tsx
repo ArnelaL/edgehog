@@ -29,6 +29,7 @@ import Page from "@/components/Page";
 import { Route, useNavigate } from "@/Navigation";
 import CreateVolumeForm from "@/forms/CreateVolume";
 import { VolumeFormData } from "@/forms/validation";
+import { Card } from "react-bootstrap";
 
 const CREATE_VOLUME_MUTATION = graphql`
   mutation VolumeCreate_volumeCreate_Mutation($input: CreateVolumeInput!) {
@@ -132,10 +133,12 @@ const VolumeCreatePage = () => {
         >
           {errorFeedback}
         </Alert>
-        <CreateVolumeForm
-          onSubmit={handleCreateVolume}
-          isLoading={isCreatingVolume}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <CreateVolumeForm
+            onSubmit={handleCreateVolume}
+            isLoading={isCreatingVolume}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

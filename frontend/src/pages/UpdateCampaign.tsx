@@ -54,6 +54,7 @@ import UpdateTargetsTabs from "@/components/UpdateTargetsTabs";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import UpdateCampaignForm from "@/forms/UpdateCampaignForm";
 import { Link, Route } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const GET_CAMPAIGN_QUERY = graphql`
   query UpdateCampaign_getCampaign_Query(
@@ -384,16 +385,19 @@ const UpdateCampaignContent = ({
             </div>
           )}
         </Alert>
-        <Row>
-          <Col lg={9}>
-            <UpdateCampaignForm campaignRef={campaign} />
-          </Col>
-          <Col lg={3}>
-            <CampaignStatsChart campaignRef={campaign} />
-          </Col>
-        </Row>
-        <hr className="bg-secondary border-2 border-top border-secondary" />
-        <UpdateTargetsTabs campaignRef={campaign} />
+        <Card className="h-100 border-0 p-3 shadow-sm mb-3">
+          <Row>
+            <Col lg={9}>
+              <UpdateCampaignForm campaignRef={campaign} />
+            </Col>
+            <Col lg={3}>
+              <CampaignStatsChart campaignRef={campaign} />
+            </Col>
+          </Row>
+        </Card>
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <UpdateTargetsTabs campaignRef={campaign} />
+        </Card>
       </Page.Main>
     </Page>
   );

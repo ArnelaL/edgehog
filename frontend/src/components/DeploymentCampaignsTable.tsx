@@ -222,6 +222,7 @@ const columns = [
           route={Route.application}
           params={{
             applicationId: mechanism.release?.application?.id || "",
+            applicationTab: "releases-tab",
           }}
         >
           {getValue()}

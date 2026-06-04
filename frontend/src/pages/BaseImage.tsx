@@ -43,6 +43,7 @@ import Spinner from "@/components/Spinner";
 import UpdateBaseImageForm from "@/forms/UpdateBaseImage";
 import type { BaseImageChanges } from "@/forms/UpdateBaseImage";
 import { Link, Route, useNavigate } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const GET_BASE_IMAGE_QUERY = graphql`
   query BaseImage_getBaseImage_Query($baseImageId: ID!) {
@@ -202,13 +203,15 @@ const BaseImageContent = ({ baseImage, queryRef }: BaseImageContentProps) => {
         >
           {errorFeedback}
         </Alert>
-        <UpdateBaseImageForm
-          baseImageRef={baseImage}
-          optionsRef={queryRef}
-          onSubmit={handleUpdateBaseImage}
-          onDelete={handleShowDeleteModal}
-          isLoading={isUpdatingBaseImage}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <UpdateBaseImageForm
+            baseImageRef={baseImage}
+            optionsRef={queryRef}
+            onSubmit={handleUpdateBaseImage}
+            onDelete={handleShowDeleteModal}
+            isLoading={isUpdatingBaseImage}
+          />
+        </Card>
         {showDeleteModal && (
           <DeleteModal
             confirmText={baseImage.version}

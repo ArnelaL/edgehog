@@ -44,6 +44,7 @@ import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const GET_CAMPAIGNS_QUERY = graphql`
   query FileDownloadCampaigns_getCampaigns_Query(
@@ -319,16 +320,18 @@ const FileDownloadCampaignsContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
 
-        <FileDownloadCampaignsLayoutContainer
-          campaignsData={campaignsData}
-          searchText={searchText}
-        />
+          <FileDownloadCampaignsLayoutContainer
+            campaignsData={campaignsData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

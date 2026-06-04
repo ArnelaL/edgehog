@@ -28,6 +28,7 @@ import Page from "@/components/Page";
 import DeviceGroupCreateForm from "@/forms/CreateDeviceGroup";
 import { Route, useNavigate } from "@/Navigation";
 import { DeviceGroupFormData } from "@/forms/validation";
+import { Card } from "react-bootstrap";
 
 const CREATE_DEVICE_GROUP_MUTATION = graphql`
   mutation DeviceGroupCreate_createDeviceGroup_Mutation(
@@ -143,10 +144,12 @@ const DeviceGroupCreatePage = () => {
         >
           {errorFeedback}
         </Alert>
-        <DeviceGroupCreateForm
-          onSubmit={handleCreateDeviceGroup}
-          isLoading={isCreatingDeviceGroup}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <DeviceGroupCreateForm
+            onSubmit={handleCreateDeviceGroup}
+            isLoading={isCreatingDeviceGroup}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

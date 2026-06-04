@@ -41,6 +41,7 @@ import SystemModelsTable from "@/components/SystemModelsTable";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const GET_SYSTEM_MODELS_QUERY = graphql`
   query SystemModels_getSystemModels_Query(
@@ -166,23 +167,25 @@ const SystemModelsContent = ({
       </Page.Header>
       <Page.Main>
         {systemModelsData.systemModels?.count === 0 ? (
-          <Result.EmptyList
-            title={
+          <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+            <Result.EmptyList
+              title={
+                <FormattedMessage
+                  id="pages.SystemModels.noSystemModels.title"
+                  defaultMessage="This space is empty"
+                />
+              }
+            >
               <FormattedMessage
-                id="pages.SystemModels.noSystemModels.title"
-                defaultMessage="This space is empty"
+                id="pages.SystemModels.noSystemModels.message"
+                defaultMessage="You haven't created any system model yet."
               />
-            }
-          >
-            <FormattedMessage
-              id="pages.SystemModels.noSystemModels.message"
-              defaultMessage="You haven't created any system model yet."
-            />
-          </Result.EmptyList>
+            </Result.EmptyList>
+          </Card>
         ) : (
-          <>
+          <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
             <SearchBox
-              className="flex-grow-1 pb-2"
+              className="pb-2"
               value={searchText || ""}
               onChange={setSearchText}
             />
@@ -190,7 +193,7 @@ const SystemModelsContent = ({
               systemModelsData={systemModelsData}
               searchText={searchText}
             />
-          </>
+          </Card>
         )}
       </Page.Main>
     </Page>

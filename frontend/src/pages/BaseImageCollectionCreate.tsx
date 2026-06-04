@@ -46,6 +46,7 @@ import CreateBaseImageCollectionForm, {
   BaseImageCollectionOutputData,
 } from "@/forms/CreateBaseImageCollection";
 import { Link, Route, useNavigate } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const CREATE_BASE_IMAGE_COLLECTION_PAGE_QUERY = graphql`
   query BaseImageCollectionCreate_getOptions_Query(
@@ -176,12 +177,14 @@ const BaseImageCollection = ({
       >
         {errorFeedback}
       </Alert>
-      <CreateBaseImageCollectionForm
-        optionsRef={baseImageCollectionOptions}
-        onSubmit={handleCreateBaseImageCollection}
-        isLoading={isCreatingBaseImageCollection}
-        baseImageCollections={baseImageCollections}
-      />
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+        <CreateBaseImageCollectionForm
+          optionsRef={baseImageCollectionOptions}
+          onSubmit={handleCreateBaseImageCollection}
+          isLoading={isCreatingBaseImageCollection}
+          baseImageCollections={baseImageCollections}
+        />
+      </Card>
     </>
   );
 };

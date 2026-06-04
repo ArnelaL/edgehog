@@ -29,9 +29,10 @@ import {
   useMemo,
   useState,
 } from "react";
-import Nav from "react-bootstrap/Nav";
-import NavItem from "react-bootstrap/NavItem";
-import NavLink from "react-bootstrap/NavLink";
+
+import Button from "@/components/Button";
+import SegmentedControl from "@/components/SegmentedControl";
+import "./Tabs.scss";
 
 type EventKey = string;
 
@@ -54,11 +55,29 @@ const defaultContextValue: TabsContextValue = {
 
 const TabsContext = createContext<TabsContextValue>(defaultContextValue);
 
+type TabButtonProps = {
+  isActive: boolean;
+  tabRef: TabRef;
+};
+
+const TabButton = ({ isActive, tabRef }: TabButtonProps) => {
+  const className = [
+    "tab-button border-0",
+    isActive ? "px-4 py-3 fw-bold active" : "px-4 py-2 text-muted",
+  ].join(" ");
+  return (
+    <Button variant="text" className={className}>
+      {tabRef.title}
+    </Button>
+  );
+};
+
 type TabsProps = {
   children?: React.ReactNode;
   className?: string;
   defaultActiveKey?: EventKey;
   tabsOrder?: EventKey[];
+  onChange?: (tabKey: string) => void;
 };
 
 const Tabs = ({
@@ -66,23 +85,44 @@ const Tabs = ({
   className,
   defaultActiveKey,
   tabsOrder = [],
+  onChange = () => {},
 }: TabsProps) => {
-  const [activeKey, setActiveKey] = useState<EventKey | undefined>(
+  const [selectedKey, setSelectedKey] = useState<EventKey | undefined>(
     defaultActiveKey,
   );
-  const [tabRefs, setTabRefs] = useState<TabRef[]>([]);
 
+  const [tabRefs, setTabRefs] = useState<TabRef[]>([]);
   const registerTab = useCallback((tabRef: TabRef) => {
-    setTabRefs((refs) => uniqBy([...refs, tabRef], "eventKey"));
+    setTabRefs((refs) => {
+      return uniqBy([...refs, tabRef], "eventKey");
+    });
   }, []);
 
   const unregisterTab = useCallback((eventKey: EventKey) => {
-    setTabRefs((tabRefs) =>
-      tabRefs.filter((tabRef) => tabRef.eventKey !== eventKey),
-    );
-    // If the active tab is removed, clear the state so it falls back to the sorted default
-    setActiveKey((prevKey) => (prevKey === eventKey ? undefined : prevKey));
+    setTabRefs((tabRefs) => {
+      const newTabRefs = tabRefs.filter(
+        (tabRef) => tabRef.eventKey !== eventKey,
+      );
+      return newTabRefs;
+    });
   }, []);
+
+  const activeKey = useMemo(
+    () =>
+      tabRefs.some((tabRef) => tabRef.eventKey === selectedKey)
+        ? selectedKey
+        : tabRefs[0]?.eventKey,
+    [tabRefs, selectedKey],
+  );
+
+  const contextValue = useMemo(
+    () => ({
+      activeKey,
+      registerTab,
+      unregisterTab,
+    }),
+    [activeKey, registerTab, unregisterTab],
+  );
 
   const sortedTabRefs = useMemo(() => {
     const tabRefsByEventKey = keyBy(tabRefs, "eventKey");
@@ -96,42 +136,36 @@ const Tabs = ({
     return sortedEventKeys.map((eventKey) => tabRefsByEventKey[eventKey]);
   }, [tabRefs, tabsOrder]);
 
-  const effectiveActiveKey =
-    activeKey ?? defaultActiveKey ?? sortedTabRefs[0]?.eventKey;
-
-  const contextValue = useMemo(
-    () => ({
-      activeKey: effectiveActiveKey,
-      registerTab,
-      unregisterTab,
-    }),
-    [effectiveActiveKey, registerTab, unregisterTab],
+  const handleOnChange = useCallback(
+    (selectedKey: string) => {
+      setSelectedKey(selectedKey);
+      onChange(selectedKey);
+    },
+    [setSelectedKey, onChange],
   );
 
   return (
     <TabsContext.Provider value={contextValue}>
       <div className={className}>
         {sortedTabRefs.length > 0 && (
-          <Nav role="tablist" as="ul" className="nav-tabs">
-            {sortedTabRefs.map((tabRef) => (
-              <NavItem key={tabRef.eventKey} as="li" role="presentation">
-                <NavLink
-                  as="button"
-                  type="button"
-                  active={effectiveActiveKey === tabRef.eventKey}
-                  onClick={() => setActiveKey(tabRef.eventKey)}
-                >
-                  {tabRef.title}
-                </NavLink>
-              </NavItem>
-            ))}
-          </Nav>
+          <SegmentedControl
+            activeId={activeKey}
+            items={sortedTabRefs}
+            getItemId={(tabRef) => tabRef.eventKey}
+            onChange={handleOnChange}
+            showControls
+          >
+            {(tabRef, isActive) => (
+              <TabButton tabRef={tabRef} isActive={isActive} />
+            )}
+          </SegmentedControl>
         )}
         {children}
       </div>
     </TabsContext.Provider>
   );
 };
+
 const useTabs = (): TabsContextValue => {
   const tabsContextValue = useContext(TabsContext);
   if (tabsContextValue == null) {
@@ -140,14 +174,24 @@ const useTabs = (): TabsContextValue => {
   return tabsContextValue;
 };
 
-type TabProps = {
-  children?: React.ReactNode;
-  className?: string;
-  eventKey: EventKey;
-  title?: string;
+type CommonProps<A, B> = {
+  [a in keyof (A & B)]: (A & B)[a];
 };
 
-const Tab = ({ children, className, eventKey, title }: TabProps) => {
+type Spread<A, B> = (CommonProps<A, B> & A) | B;
+
+// Use custom Spread type to get all correct props of "div", since TypeScript does not
+// support spreading yet: https://github.com/microsoft/TypeScript/issues/10727
+type TabProps = Spread<
+  React.ComponentProps<"div">,
+  {
+    children?: React.ReactNode;
+    eventKey: EventKey;
+    title?: string;
+  }
+>;
+
+const Tab = ({ eventKey, title, ...restProps }: TabProps) => {
   const { registerTab, unregisterTab, activeKey } = useTabs();
 
   useEffect(() => {
@@ -161,7 +205,7 @@ const Tab = ({ children, className, eventKey, title }: TabProps) => {
     return null;
   }
 
-  return <div className={className}>{children}</div>;
+  return <div {...restProps} />;
 };
 
 export { Tab };

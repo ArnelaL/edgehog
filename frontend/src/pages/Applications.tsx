@@ -47,6 +47,7 @@ import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const GET_APPLICATIONS_QUERY = graphql`
   query Applications_getApplications_Query(
@@ -267,17 +268,18 @@ const ApplicationsContent = ({
         >
           {errorFeedback}
         </Alert>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <ApplicationsLayoutContainer
-          applicationsData={applicationsData}
-          searchText={searchText}
-          onDelete={setApplicationToDelete}
-        />
-
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <ApplicationsLayoutContainer
+            applicationsData={applicationsData}
+            searchText={searchText}
+            onDelete={setApplicationToDelete}
+          />
+        </Card>
         {applicationToDelete && (
           <DeleteApplicationModal
             applicationToDelete={applicationToDelete}

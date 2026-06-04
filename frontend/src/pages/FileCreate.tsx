@@ -45,6 +45,7 @@ import Spinner from "@/components/Spinner";
 import CreateFileForm, { type FileFormOutputData } from "@/forms/CreateFile";
 import { prepareUploadFile } from "@/lib/files";
 import { Link, Route, useNavigate } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const GET_REPOSITORY_QUERY = graphql`
   query FileCreate_getOptions_Query($repositoryId: ID!) {
@@ -177,12 +178,13 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
         >
           {errorFeedback}
         </Alert>
-
-        <CreateFileForm
-          repositoryRef={repository}
-          onSubmit={handleCreateFile}
-          isLoading={isCreatingFile || isUploading}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <CreateFileForm
+            repositoryRef={repository}
+            onSubmit={handleCreateFile}
+            isLoading={isCreatingFile || isUploading}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

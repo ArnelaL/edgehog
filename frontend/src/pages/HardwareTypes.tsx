@@ -41,6 +41,7 @@ import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const GET_HARDWARE_TYPES_QUERY = graphql`
   query HardwareTypes_getHardwareTypes_Query(
@@ -160,23 +161,25 @@ const HardwareTypesContent = ({
       </Page.Header>
       <Page.Main>
         {hardwareTypesData.hardwareTypes?.count === 0 ? (
-          <Result.EmptyList
-            title={
+          <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+            <Result.EmptyList
+              title={
+                <FormattedMessage
+                  id="pages.HardwareTypes.noHardwareTypes.title"
+                  defaultMessage="This space is empty"
+                />
+              }
+            >
               <FormattedMessage
-                id="pages.HardwareTypes.noHardwareTypes.title"
-                defaultMessage="This space is empty"
+                id="pages.HardwareTypes.noHardwareTypes.message"
+                defaultMessage="You haven't created any hardware type yet."
               />
-            }
-          >
-            <FormattedMessage
-              id="pages.HardwareTypes.noHardwareTypes.message"
-              defaultMessage="You haven't created any hardware type yet."
-            />
-          </Result.EmptyList>
+            </Result.EmptyList>
+          </Card>
         ) : (
-          <>
+          <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
             <SearchBox
-              className="flex-grow-1 pb-2"
+              className="pb-2"
               value={searchText}
               onChange={setSearchText}
             />
@@ -184,7 +187,7 @@ const HardwareTypesContent = ({
               hardwareTypesData={hardwareTypesData}
               searchText={searchText}
             />
-          </>
+          </Card>
         )}
       </Page.Main>
     </Page>

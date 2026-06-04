@@ -40,6 +40,7 @@ import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const GET_NETWORKS_QUERY = graphql`
   query Networks_getNetworks_Query(
@@ -126,14 +127,7 @@ const NetworksContent = ({ getNetworksQuery }: NetworksContentProps) => {
 
   return (
     <Page>
-      <Page.Header
-        title={
-          <FormattedMessage
-            id="pages.Networks.title"
-            defaultMessage="Networks"
-          />
-        }
-      >
+      <Page.Header>
         <Button as={Link} route={Route.networksNew}>
           <FormattedMessage
             id="pages.Networks.createButton"
@@ -142,15 +136,17 @@ const NetworksContent = ({ getNetworksQuery }: NetworksContentProps) => {
         </Button>
       </Page.Header>
       <Page.Main>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <NetworksLayoutContainer
-          networksData={networksData}
-          searchText={searchText}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <NetworksLayoutContainer
+            networksData={networksData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

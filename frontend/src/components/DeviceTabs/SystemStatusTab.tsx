@@ -27,6 +27,7 @@ import Form from "@/components/Form";
 import Stack from "@/components/Stack";
 import { Tab } from "@/components/Tabs";
 import { formatBytes, FormRow, FormValue } from "@/pages/Device";
+import { Card } from "react-bootstrap";
 
 const DEVICE_SYSTEM_STATUS_FRAGMENT = graphql`
   fragment SystemStatusTab_systemStatus on Device {
@@ -55,13 +56,14 @@ const DeviceSystemStatusTab = ({ deviceRef }: DeviceSystemStatusTabProps) => {
   }
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-system-status-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.SystemStatusTab.title",
         defaultMessage: "System Status",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <p className="text-muted">
           <FormattedMessage
             id="components.DeviceTabs.SystemStatusTab.lastUpdateAt"
@@ -140,7 +142,7 @@ const DeviceSystemStatusTab = ({ deviceRef }: DeviceSystemStatusTabProps) => {
             </FormRow>
           )}
         </Stack>
-      </div>
+      </Card>
     </Tab>
   );
 };

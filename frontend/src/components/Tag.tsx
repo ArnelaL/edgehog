@@ -20,17 +20,13 @@
 
 import Badge from "react-bootstrap/Badge";
 import type { BadgeProps } from "react-bootstrap/Badge";
+import "./Tag.scss";
 
 type Props = Omit<BadgeProps, "pill" | "bg">;
 
 const Tag = ({ children, className, ...restProps }: Props) => {
   return (
-    <Badge
-      bg="primary"
-      pill
-      className={`py-1 px-3 ${className}`}
-      {...restProps}
-    >
+    <Badge pill className={`tag py-1 px-3 ${className}`} {...restProps}>
       {children}
     </Badge>
   );

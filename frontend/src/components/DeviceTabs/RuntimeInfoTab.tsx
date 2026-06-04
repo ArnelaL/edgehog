@@ -25,6 +25,7 @@ import Form from "@/components/Form";
 import Stack from "@/components/Stack";
 import { Tab } from "@/components/Tabs";
 import { FormRow } from "@/pages/Device";
+import { Card } from "react-bootstrap";
 
 const DEVICE_RUNTIME_INFO_FRAGMENT = graphql`
   fragment RuntimeInfoTab_runtimeInfo on Device {
@@ -57,13 +58,14 @@ const DeviceRuntimeInfoTab = ({ deviceRef }: DeviceRuntimeInfoTabProps) => {
   }
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-runtime-info-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.RuntimeInfoTab.title",
         defaultMessage: "Runtime",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <Stack gap={3}>
           {runtimeInfo.name !== null && (
             <FormRow
@@ -122,7 +124,7 @@ const DeviceRuntimeInfoTab = ({ deviceRef }: DeviceRuntimeInfoTabProps) => {
             </FormRow>
           )}
         </Stack>
-      </div>
+      </Card>
     </Tab>
   );
 };

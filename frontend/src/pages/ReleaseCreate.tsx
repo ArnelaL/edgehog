@@ -45,6 +45,7 @@ import Page from "@/components/Page";
 import Spinner from "@/components/Spinner";
 import CreateRelease from "@/forms/CreateRelease";
 import { Route, useNavigate } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const CREATE_RELEASE_PAGE_QUERY = graphql`
   query ReleaseCreate_getOptions_Query($applicationId: ID!) {
@@ -99,7 +100,7 @@ const Release = ({ releaseOptions }: ReleaseOptions) => {
           if (releaseId) {
             return navigate({
               route: Route.application,
-              params: { applicationId },
+              params: { applicationId, applicationTab: "releases-tab" },
             });
           }
           if (errors) {
@@ -184,7 +185,9 @@ const ReleaseWrapper = ({ getReleaseOptionsQuery }: ReleaseWrapperProps) => {
         }
       />
       <Page.Main>
-        <Release releaseOptions={releaseOptions} />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <Release releaseOptions={releaseOptions} />
+        </Card>
       </Page.Main>
     </Page>
   );

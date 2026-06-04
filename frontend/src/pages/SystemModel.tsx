@@ -44,6 +44,7 @@ import Result from "@/components/Result";
 import Spinner from "@/components/Spinner";
 import UpdateSystemModelForm from "@/forms/UpdateSystemModel";
 import type { SystemModelOutputData } from "@/forms/UpdateSystemModel";
+import { Card } from "react-bootstrap";
 
 const GET_SYSTEM_MODEL_QUERY = graphql`
   query SystemModel_getSystemModel_Query($systemModelId: ID!) {
@@ -229,13 +230,15 @@ const SystemModelContent = ({
         >
           {errorFeedback}
         </Alert>
-        <UpdateSystemModelForm
-          systemModelRef={systemModel}
-          optionsRef={queryRef}
-          onSubmit={handleUpdateSystemModel}
-          onDelete={handleShowDeleteModal}
-          isLoading={isUpdatingSystemModel}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ptb-2">
+          <UpdateSystemModelForm
+            systemModelRef={systemModel}
+            optionsRef={queryRef}
+            onSubmit={handleUpdateSystemModel}
+            onDelete={handleShowDeleteModal}
+            isLoading={isUpdatingSystemModel}
+          />
+        </Card>
         {showDeleteModal && (
           <DeleteModal
             confirmText={systemModel.handle}
@@ -282,21 +285,23 @@ const SystemModelWrapper = ({
 
   if (!queryData.systemModel) {
     return (
-      <Result.NotFound
-        title={
-          <FormattedMessage
-            id="pages.SystemModel.systemModelNotFound.title"
-            defaultMessage="System model not found."
-          />
-        }
-      >
-        <Link route={Route.systemModels}>
-          <FormattedMessage
-            id="pages.SystemModel.systemModelNotFound.message"
-            defaultMessage="Return to the system model list."
-          />
-        </Link>
-      </Result.NotFound>
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+        <Result.NotFound
+          title={
+            <FormattedMessage
+              id="pages.SystemModel.systemModelNotFound.title"
+              defaultMessage="System model not found."
+            />
+          }
+        >
+          <Link route={Route.systemModels}>
+            <FormattedMessage
+              id="pages.SystemModel.systemModelNotFound.message"
+              defaultMessage="Return to the system model list."
+            />
+          </Link>
+        </Result.NotFound>
+      </Card>
     );
   }
 

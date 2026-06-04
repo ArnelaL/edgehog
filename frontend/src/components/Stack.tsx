@@ -18,6 +18,8 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import Stack from "react-bootstrap/Stack";
+import Stack, { StackProps } from "react-bootstrap/Stack";
+
+export type { StackProps };
 
 export default Stack;

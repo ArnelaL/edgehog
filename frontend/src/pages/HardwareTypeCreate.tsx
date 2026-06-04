@@ -28,6 +28,7 @@ import Page from "@/components/Page";
 import CreateHardwareTypeForm from "@/forms/CreateHardwareType";
 import type { HardwareTypeOutputData } from "@/forms/CreateHardwareType";
 import { Route, useNavigate } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const CREATE_HARDWARE_TYPE_MUTATION = graphql`
   mutation HardwareTypeCreate_createHardwareType_Mutation(
@@ -128,10 +129,12 @@ const HardwareTypeCreatePage = () => {
         >
           {errorFeedback}
         </Alert>
-        <CreateHardwareTypeForm
-          onSubmit={handleCreateHardwareType}
-          isLoading={isCreatingHardwareType}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <CreateHardwareTypeForm
+            onSubmit={handleCreateHardwareType}
+            isLoading={isCreatingHardwareType}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

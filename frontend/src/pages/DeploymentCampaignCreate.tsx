@@ -46,6 +46,7 @@ import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import CreateDeploymentCampaignForm from "@/forms/CreateDeploymentCampaign";
 import type { DeploymentCampaignData } from "@/forms/CreateDeploymentCampaign";
 import { Link, Route, useNavigate } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const GET_CREATE_CAMPAIGN_OPTIONS_QUERY = graphql`
   query DeploymentCampaignCreate_getOptions_Query(
@@ -279,9 +280,11 @@ const DeploymentCampaignCreatePage = () => {
               }
             />
             <Page.Main>
-              <DeploymentCampaignWrapper
-                getCreateCampaignOptionsQuery={getCreateCampaignOptionsQuery}
-              />
+              <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+                <DeploymentCampaignWrapper
+                  getCreateCampaignOptionsQuery={getCreateCampaignOptionsQuery}
+                />
+              </Card>
             </Page.Main>
           </Page>
         )}

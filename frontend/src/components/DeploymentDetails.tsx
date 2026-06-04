@@ -578,7 +578,10 @@ const DeploymentDetails = ({
               className="d-flex flex-column flex-md-row align-items-md-center gap-4 ms-2"
               xs="auto"
             >
-              <Link route={Route.application} params={{ applicationId }}>
+              <Link
+                route={Route.application}
+                params={{ applicationId, applicationTab: "releases-tab" }}
+              >
                 {applicationName}
               </Link>
 

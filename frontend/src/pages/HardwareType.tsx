@@ -44,6 +44,7 @@ import Result from "@/components/Result";
 import Spinner from "@/components/Spinner";
 import UpdateHardwareTypeForm from "@/forms/UpdateHardwareType";
 import type { HardwareTypeOutputData } from "@/forms/CreateHardwareType";
+import { Card } from "react-bootstrap";
 
 const GET_HARDWARE_TYPE_QUERY = graphql`
   query HardwareType_getHardwareType_Query($hardwareTypeId: ID!) {
@@ -196,12 +197,14 @@ const HardwareTypeContent = ({ hardwareType }: HardwareTypeContentProps) => {
         >
           {errorFeedback}
         </Alert>
-        <UpdateHardwareTypeForm
-          hardwareTypeRef={hardwareType}
-          onSubmit={handleUpdateHardwareType}
-          onDelete={handleShowDeleteModal}
-          isLoading={isUpdatingHardwareType}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <UpdateHardwareTypeForm
+            hardwareTypeRef={hardwareType}
+            onSubmit={handleUpdateHardwareType}
+            onDelete={handleShowDeleteModal}
+            isLoading={isUpdatingHardwareType}
+          />
+        </Card>
         {showDeleteModal && (
           <DeleteModal
             confirmText={hardwareType.handle}

@@ -29,6 +29,7 @@ import Page from "@/components/Page";
 import { Route, useNavigate } from "@/Navigation";
 import CreateImageCredentialForm from "@/forms/CreateImageCredential";
 import { ImageCredentialFormData } from "@/forms/validation";
+import { Card } from "react-bootstrap";
 
 const CREATE_IMAGE_CREDENTIAL_MUTATION = graphql`
   mutation ImageCredentialCreate_imageCredentialCreate_Mutation(
@@ -103,10 +104,12 @@ const ImageCredentialCreatePage = () => {
         >
           {errorFeedback}
         </Alert>
-        <CreateImageCredentialForm
-          onSubmit={handleCreateImageCredential}
-          isLoading={isCreatingImageCredential}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <CreateImageCredentialForm
+            onSubmit={handleCreateImageCredential}
+            isLoading={isCreatingImageCredential}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

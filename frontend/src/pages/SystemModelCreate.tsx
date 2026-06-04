@@ -46,6 +46,7 @@ import Result from "@/components/Result";
 import Spinner from "@/components/Spinner";
 import { Link, Route, useNavigate } from "@/Navigation";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import { Card } from "react-bootstrap";
 
 const GET_CREATE_SYSTEM_MODEL_OPTIONS_QUERY = graphql`
   query SystemModelCreate_getOptions_Query(
@@ -255,11 +256,13 @@ const SystemModelCreatePage = () => {
               }
             />
             <Page.Main>
-              <SystemModelWrapper
-                getCreateSystemModelOptionsQuery={
-                  getCreateSystemModelOptionsQuery
-                }
-              />
+              <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+                <SystemModelWrapper
+                  getCreateSystemModelOptionsQuery={
+                    getCreateSystemModelOptionsQuery
+                  }
+                />
+              </Card>
             </Page.Main>
           </Page>
         )}

@@ -43,6 +43,7 @@ import Result from "@/components/Result";
 import Button from "@/components/Button";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import CreateChannelForm from "@/forms/CreateChannel";
+import { Card } from "react-bootstrap";
 
 const GET_CREATE_CHANNEL_OPTIONS_QUERY = graphql`
   query ChannelCreate_getDeviceGroups_Query(
@@ -143,31 +144,21 @@ const Channel = ({ getCreateChannelOptionsQuery }: ChannelProps) => {
   );
 
   return (
-    <Page>
-      <Page.Header
-        title={
-          <FormattedMessage
-            id="pages.ChannelCreate.title"
-            defaultMessage="Create Channel"
-          />
-        }
+    <>
+      <Alert
+        show={!!errorFeedback}
+        variant="danger"
+        onClose={() => setErrorFeedback(null)}
+        dismissible
+      >
+        {errorFeedback}
+      </Alert>
+      <CreateChannelForm
+        queryRef={channelCreateData}
+        onSubmit={handleCreateChannel}
+        isLoading={isCreatingChannel}
       />
-      <Page.Main>
-        <Alert
-          show={!!errorFeedback}
-          variant="danger"
-          onClose={() => setErrorFeedback(null)}
-          dismissible
-        >
-          {errorFeedback}
-        </Alert>
-        <CreateChannelForm
-          queryRef={channelCreateData}
-          onSubmit={handleCreateChannel}
-          isLoading={isCreatingChannel}
-        />
-      </Page.Main>
-    </Page>
+    </>
   );
 };
 const NoGroups = () => (
@@ -250,9 +241,23 @@ const ChannelCreatePage = () => {
         onReset={fetchCreateChannelOptions}
       >
         {getCreateChannelOptionsQuery && (
-          <ChannelWrapper
-            getCreateChannelOptionsQuery={getCreateChannelOptionsQuery}
-          />
+          <Page>
+            <Page.Header
+              title={
+                <FormattedMessage
+                  id="pages.ChannelCreate.title"
+                  defaultMessage="Create Channel"
+                />
+              }
+            />
+            <Page.Main>
+              <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+                <ChannelWrapper
+                  getCreateChannelOptionsQuery={getCreateChannelOptionsQuery}
+                />
+              </Card>
+            </Page.Main>
+          </Page>
         )}
       </ErrorBoundary>
     </Suspense>

@@ -269,7 +269,10 @@ const DeploymentCampaign = ({ campaignRef }: DeploymentCampaignProps) => {
             >
               <Link
                 route={Route.application}
-                params={{ applicationId: release.application.id }}
+                params={{
+                  applicationId: release.application.id,
+                  applicationTab: "releases-tab",
+                }}
               >
                 {release.application.name}
               </Link>

@@ -23,6 +23,7 @@ import type { NetworkInterfacesTab_networkInterfaces$key } from "@/api/__generat
 
 import { Tab } from "@/components/Tabs";
 import NetworkInterfacesTable from "@/components/NetworkInterfacesTable";
+import { Card } from "react-bootstrap";
 
 const DEVICE_NETWORK_INTERFACES__FRAGMENT = graphql`
   fragment NetworkInterfacesTab_networkInterfaces on Device {
@@ -47,15 +48,16 @@ const DeviceNetworkInterfacesTab = ({
 
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-network-interfaces-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.NetworkInterfacesTab.title",
         defaultMessage: "Network Interfaces",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <NetworkInterfacesTable deviceRef={device} />
-      </div>
+      </Card>
     </Tab>
   );
 };

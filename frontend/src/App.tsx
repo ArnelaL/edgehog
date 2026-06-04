@@ -186,6 +186,7 @@ function App() {
     <div
       data-testid="app"
       className="d-flex vh-100 flex-column overflow-hidden"
+      style={{ background: "#f4f4f4" }}
     >
       {showNavigation && <Topbar onToggle={toggleIsMobileMenuOpen} />}
 

@@ -23,6 +23,7 @@ import type { StorageUsageTab_storageUsage$key } from "@/api/__generated__/Stora
 
 import StorageTable from "@/components/StorageTable";
 import { Tab } from "@/components/Tabs";
+import { Card } from "react-bootstrap";
 
 const DEVICE_STORAGE_USAGE_FRAGMENT = graphql`
   fragment StorageUsageTab_storageUsage on Device {
@@ -43,15 +44,16 @@ const DeviceStorageUsageTab = ({ deviceRef }: DeviceStorageUsageTabProps) => {
   }
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-storage-usage-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.StorageUsageTab.title",
         defaultMessage: "Storage",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <StorageTable deviceRef={device} />
-      </div>
+      </Card>
     </Tab>
   );
 };

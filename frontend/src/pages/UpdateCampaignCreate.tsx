@@ -46,6 +46,7 @@ import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import type { UpdateCampaignOutputData } from "@/forms/CreateUpdateCampaign";
 import CreateUpdateCampaignForm from "@/forms/CreateUpdateCampaign";
 import { Link, Route, useNavigate } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const GET_CREATE_CAMPAIGN_OPTIONS_QUERY = graphql`
   query UpdateCampaignCreate_getOptions_Query(
@@ -282,9 +283,11 @@ const UpdateCampaignCreatePage = () => {
               }
             />
             <Page.Main>
-              <UpdateCampaignWrapper
-                getCreateCampaignOptionsQuery={getCreateCampaignOptionsQuery}
-              />
+              <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+                <UpdateCampaignWrapper
+                  getCreateCampaignOptionsQuery={getCreateCampaignOptionsQuery}
+                />
+              </Card>
             </Page.Main>
           </Page>
         )}

@@ -69,6 +69,7 @@ import {
   KeyValue,
   type ContainerInputData,
 } from "@/forms/validation";
+import { Card } from "react-bootstrap";
 
 export const restartPolicyOptions = [
   { value: "no", label: "No" },
@@ -126,7 +127,7 @@ const NameSection = ({ form }: { form: UseFormReturn<ContainerInputData> }) => {
   } = form;
 
   return (
-    <div className="ps-2">
+    <Card className="border-0 p-3 shadow-sm mb-2 rounded-3">
       <FormRow
         id="name"
         label={
@@ -139,7 +140,7 @@ const NameSection = ({ form }: { form: UseFormReturn<ContainerInputData> }) => {
         <Form.Control {...register("name")} isInvalid={!!errors.name} />
         <FormFeedback feedback={errors.name?.message} />
       </FormRow>
-    </div>
+    </Card>
   );
 };
 

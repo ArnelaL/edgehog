@@ -50,6 +50,7 @@ import type { Channel_OptionsFragment$key } from "@/api/__generated__/Channel_Op
 import type { Channel_refetchOptions_Query } from "@/api/__generated__/Channel_refetchOptions_Query.graphql";
 import type { Channel_updateChannel_Mutation } from "@/api/__generated__/Channel_updateChannel_Mutation.graphql";
 import type { Channel_deleteChannel_Mutation } from "@/api/__generated__/Channel_deleteChannel_Mutation.graphql";
+import { Card } from "react-bootstrap";
 
 const UPDATE_CHANNEL_OPTIONS_FRAGMENT = graphql`
   fragment Channel_OptionsFragment on RootQueryType
@@ -249,7 +250,7 @@ const ChannelContent = ({ queryRef, channel }: ChannelContentProps) => {
         >
           {errorFeedback}
         </Alert>
-        <div className="mb-3">
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
           <ChannelForm
             channelRef={channel}
             optionsRef={channelOptions}
@@ -257,7 +258,7 @@ const ChannelContent = ({ queryRef, channel }: ChannelContentProps) => {
             onDelete={handleShowDeleteModal}
             isLoading={isUpdatingChannel}
           />
-        </div>
+        </Card>{" "}
         {showDeleteModal && (
           <DeleteModal
             confirmText={channel.handle}

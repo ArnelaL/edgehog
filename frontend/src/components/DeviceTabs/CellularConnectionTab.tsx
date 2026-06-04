@@ -23,6 +23,7 @@ import type { CellularConnectionTab_cellularConnection$key } from "@/api/__gener
 
 import CellularConnectionTabs from "@/components/CellularConnectionTabs";
 import { Tab } from "@/components/Tabs";
+import { Card } from "react-bootstrap";
 
 const DEVICE_CELLULAR_CONNECTION_FRAGMENT = graphql`
   fragment CellularConnectionTab_cellularConnection on Device {
@@ -47,15 +48,16 @@ const DeviceCellularConnectionTab = ({
 
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-cellular-connection-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.CellularConnectionTab.title",
         defaultMessage: "Cellular Connection",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <CellularConnectionTabs deviceRef={device} />
-      </div>
+      </Card>
     </Tab>
   );
 };

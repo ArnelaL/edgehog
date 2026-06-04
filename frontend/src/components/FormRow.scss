@@ -1,0 +1,18 @@
+.form-row-group {
+  margin-bottom: 0.5rem;
+
+  .form-row-label {
+    font-size: 0.98rem;
+    font-weight: 500;
+    opacity: 0.9;
+    margin-bottom: 0px;
+    margin-top: 0px;
+  }
+
+  .form-row-value {
+    select,
+    textarea {
+      width: 100%;
+    }
+  }
+}

@@ -29,6 +29,7 @@ import AddAvailableApplications from "@/components/AddAvailableApplications";
 import DeployedApplicationsTable from "@/components/DeployedApplicationsTable";
 import Alert from "@/components/Alert";
 import { Tab } from "@/components/Tabs";
+import { Card } from "react-bootstrap";
 
 // TODO: the fragment is defined on the RootQueryType so it can specify
 // which query to run, otherwise Relay would automatically use the `node`
@@ -83,6 +84,7 @@ const DeviceApplicationsTab = ({ deviceRef }: DeviceApplicationsTabProps) => {
 
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="applications-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.ApplicationsTab.title",
@@ -98,7 +100,7 @@ const DeviceApplicationsTab = ({ deviceRef }: DeviceApplicationsTabProps) => {
       >
         {errorFeedback}
       </Alert>
-      <div className="mt-3">
+      <Card className="h-100 border-0 p-3 shadow-sm mb-3">
         <h5>
           <FormattedMessage
             id="components.DeviceTabs.ApplicationsTab.InstallNewApp"
@@ -112,6 +114,8 @@ const DeviceApplicationsTab = ({ deviceRef }: DeviceApplicationsTabProps) => {
           setErrorFeedback={setErrorFeedback}
           onDeployComplete={handleRefetch}
         />
+      </Card>
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <h5 className="mt-4">
           <FormattedMessage
             id="components.DeviceTabs.ApplicationsTab.DeployedApplications"
@@ -119,7 +123,7 @@ const DeviceApplicationsTab = ({ deviceRef }: DeviceApplicationsTabProps) => {
           />
         </h5>
         <DeployedApplicationsTable deviceRef={device} />
-      </div>
+      </Card>
     </Tab>
   );
 };

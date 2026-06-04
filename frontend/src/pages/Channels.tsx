@@ -42,6 +42,7 @@ import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const GET_CHANNELS_QUERY = graphql`
   query Channels_getChannels_Query(
@@ -286,15 +287,17 @@ const ChannelsContent = ({ getChannelsQuery }: ChannelsContentProps) => {
         </Button>
       </Page.Header>
       <Page.Main>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <ChannelsLayoutContainer
-          channelsData={channelsData}
-          searchText={searchText}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <ChannelsLayoutContainer
+            channelsData={channelsData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

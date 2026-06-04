@@ -55,7 +55,7 @@ enum Route {
   updateCampaignsEdit = "/update-campaigns/:updateCampaignId",
   applications = "/applications",
   applicationNew = "/applications/new",
-  application = "/applications/:applicationId",
+  application = "/applications/:applicationId/:applicationTab",
   release = "/applications/:applicationId/release/:releaseId",
   releaseNew = "/applications/:applicationId/release/new",
   containers = "/containers",
@@ -247,10 +247,15 @@ const matchingParametricRoute = (
         : null;
 
     case Route.application:
-      return params && typeof params["applicationId"] === "string"
+      return params &&
+        typeof params["applicationId"] === "string" &&
+        typeof params["applicationTab"] === "string"
         ? {
             route,
-            params: { applicationId: params.applicationId },
+            params: {
+              applicationId: params.applicationId,
+              applicationTab: params.applicationTab,
+            },
           }
         : null;
 

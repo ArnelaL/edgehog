@@ -30,6 +30,7 @@ import FilesDownloadTab from "@/components/DeviceTabs/FilesDeviceToServerTab";
 import FilesServerToDeviceTab from "@/components/DeviceTabs/FilesServerToDeviceTab";
 import Form from "@/components/Form";
 import { Tab } from "@/components/Tabs";
+import { Card } from "react-bootstrap";
 
 type FileManagementMode =
   | "download-to-device-file"
@@ -193,9 +194,13 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
   };
 
   return (
-    <Tab eventKey="device-file-management-tab" title="File Management">
+    <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
+      eventKey="device-file-management-tab"
+      title="File Management"
+    >
       {modeOptions.length > 1 && (
-        <div className="mt-3">
+        <Card className="h-100 border-0 p-3 shadow-sm mb-3">
           <Form.Group controlId="file-management-mode" className="mb-0">
             <h5>
               <FormattedMessage
@@ -219,7 +224,7 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
               }}
             />
           </Form.Group>
-        </div>
+        </Card>
       )}
 
       {renderTabContent()}

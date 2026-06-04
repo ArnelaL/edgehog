@@ -23,6 +23,7 @@ import type { WiFiScanResultsTab_wifiScanResults$key } from "@/api/__generated__
 
 import { Tab } from "@/components/Tabs";
 import WiFiScanResultsTable from "@/components/WiFiScanResultsTable";
+import { Card } from "react-bootstrap";
 
 const DEVICE_WIFI_SCAN_RESULTS_FRAGMENT = graphql`
   fragment WiFiScanResultsTab_wifiScanResults on Device {
@@ -46,15 +47,16 @@ const DeviceWiFiScanResultsTab = ({
 
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-wifi-scan-results-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.WiFiScanResultsTab.title",
         defaultMessage: "WiFi APs",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <WiFiScanResultsTable deviceRef={device} />
-      </div>
+      </Card>
     </Tab>
   );
 };

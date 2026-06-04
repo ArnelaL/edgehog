@@ -53,6 +53,7 @@ import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import type { BaseImageCollectionChanges } from "@/forms/UpdateBaseImageCollection";
 import UpdateBaseImageCollectionForm from "@/forms/UpdateBaseImageCollection";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
+import { Card } from "react-bootstrap";
 
 const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
   query BaseImageCollection_getBaseImageCollection_Query(
@@ -301,43 +302,45 @@ const BaseImageCollectionContent = ({
         >
           {errorFeedback}
         </Alert>
-        <div className="mb-3">
+        <Card className="h-100 border-0 p-3 shadow-sm mb-3">
           <UpdateBaseImageCollectionForm
             baseImageCollectionRef={baseImageCollection}
             onSubmit={handleUpdateBaseImageCollection}
             onDelete={handleShowDeleteModal}
             isLoading={isUpdatingBaseImageCollection}
           />
-        </div>
-        <hr className="bg-secondary border-2 border-top border-secondary" />
-        <div className="d-flex justify-content-between align-items-center gap-2">
-          <h3>
-            <FormattedMessage
-              id="pages.BaseImageCollection.baseImagesLabel"
-              defaultMessage="Base Images"
-            />
-          </h3>
-          <Button
-            variant="secondary"
-            as={Link}
-            route={Route.baseImagesNew}
-            params={{ baseImageCollectionId }}
-          >
-            <FormattedMessage
-              id="pages.BaseImageCollection.createBaseImageButton"
-              defaultMessage="Create Base Image"
-            />
-          </Button>
-        </div>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <BaseImagesLayoutContainer
-          baseImageCollectionRef={baseImageCollection}
-          searchText={searchText}
-        />
+        </Card>
+        {/* <hr className="bg-secondary border-2 border-top border-secondary" /> */}
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 pt-2">
+          <div className="d-flex justify-content-between align-items-center gap-2">
+            <h3>
+              <FormattedMessage
+                id="pages.BaseImageCollection.baseImagesLabel"
+                defaultMessage="Base Images"
+              />
+            </h3>
+            <Button
+              variant="secondary"
+              as={Link}
+              route={Route.baseImagesNew}
+              params={{ baseImageCollectionId }}
+            >
+              <FormattedMessage
+                id="pages.BaseImageCollection.createBaseImageButton"
+                defaultMessage="Create Base Image"
+              />
+            </Button>
+          </div>
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <BaseImagesLayoutContainer
+            baseImageCollectionRef={baseImageCollection}
+            searchText={searchText}
+          />
+        </Card>
         {showDeleteModal && (
           <DeleteModal
             confirmText={baseImageCollection?.handle || ""}

@@ -43,6 +43,7 @@ import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
+import { Card } from "react-bootstrap";
 
 const GET_DEPLOYMENTS_QUERY = graphql`
   query Deployments_getDeployments_Query(
@@ -322,15 +323,17 @@ const DeploymentsContent = ({
         }
       ></Page.Header>
       <Page.Main>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <DeploymentsLayoutContainer
-          deploymentsData={deploymentsData}
-          searchText={searchText}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <DeploymentsLayoutContainer
+            deploymentsData={deploymentsData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

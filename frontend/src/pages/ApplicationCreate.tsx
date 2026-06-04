@@ -32,6 +32,7 @@ import { Route, useNavigate } from "@/Navigation";
 import Center from "@/components/Center";
 import Spinner from "@/components/Spinner";
 import { ApplicationFormData } from "@/forms/validation";
+import { Card } from "react-bootstrap";
 
 const CREATE_APPLICATION_MUTATION = graphql`
   mutation ApplicationCreate_createApplication_Mutation(
@@ -66,7 +67,7 @@ const Application = () => {
           if (applicationId) {
             return navigate({
               route: Route.application,
-              params: { applicationId },
+              params: { applicationId, applicationTab: "releases-tab" },
             });
           }
           if (errors) {
@@ -164,7 +165,9 @@ const ApplicationCreatePage = () => {
             }
           />
           <Page.Main>
-            <ApplicationWrapper />
+            <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+              <ApplicationWrapper />
+            </Card>
           </Page.Main>
         </Page>
       </ErrorBoundary>

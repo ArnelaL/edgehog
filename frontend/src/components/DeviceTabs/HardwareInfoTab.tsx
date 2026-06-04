@@ -25,6 +25,7 @@ import Form from "@/components/Form";
 import Stack from "@/components/Stack";
 import { Tab } from "@/components/Tabs";
 import { formatBytes, FormRow } from "@/pages/Device";
+import { Card } from "react-bootstrap";
 
 const DEVICE_HARDWARE_INFO_FRAGMENT = graphql`
   fragment HardwareInfoTab_hardwareInfo on Device {
@@ -54,13 +55,14 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
   }
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-hardware-info-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.HardwareInfoTab.title",
         defaultMessage: "Hardware Info",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <Stack gap={3}>
           {hardwareInfo.cpuArchitecture != null && (
             <FormRow
@@ -148,7 +150,7 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
             </FormRow>
           )}
         </Stack>
-      </div>
+      </Card>
     </Tab>
   );
 };
