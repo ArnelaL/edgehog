@@ -29,7 +29,7 @@ defmodule Edgehog.Astarte.Device.ResourceEvent do
   alias Edgehog.Astarte.Device.ResourceEvent
 
   @impl Edgehog.Astarte.Device.ResourceEvent.Behaviour
-  def get(%AppEngine{} = client, device_id, interface, resource_id, query \\ [limit: 1000]) do
+  def get(%AppEngine{} = client, device_id, interface, resource_id, query \\ []) do
     case Devices.get_datastream_data(client, device_id, interface,
            path: "/#{resource_id}",
            query: query
