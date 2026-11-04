@@ -25,8 +25,10 @@ defmodule Edgehog.Containers.FileBind do
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
+  alias Edgehog.Containers.Calculations.ResourceEvents
   alias Edgehog.Containers.FileBind.Calculations
   alias Edgehog.Containers.FileBind.Changes
+  alias Edgehog.Containers.FileBind.Types
 
   audit_log do
     action_types [:update]
@@ -248,6 +250,16 @@ defmodule Edgehog.Containers.FileBind do
     end
 
     calculate :is_ready, :boolean, expr(state in [:available, :unavailable]) do
+      public? true
+    end
+
+    calculate :events,
+              {:array, Types.Event},
+              {ResourceEvents,
+               interface: "io.edgehog.devicemanager.apps.FileBindEvent",
+               resource_id_key: :id,
+               event_type: Types.Event} do
+      description "Lifecycle events reported by the device for this file bind."
       public? true
     end
   end
