@@ -30,10 +30,12 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
   alias Astarte.Client.APIError
   alias Edgehog.Astarte.Device.FileDownloadRequest, as: AstarteFileDownloadRequest
   alias Edgehog.Astarte.Device.FileTransferCapabilities
+  alias Edgehog.Astarte.Device.ResourceEvent
   alias Edgehog.Campaigns
   alias Edgehog.Campaigns.Campaign
   alias Edgehog.Campaigns.CampaignMechanism.Core, as: MechanismCore
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentDeploy
+  alias Edgehog.Campaigns.CampaignMechanism.Helpers
   alias Edgehog.Campaigns.CampaignTarget
   alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Files.FileDownloadRequest
@@ -826,6 +828,66 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
                )
 
       assert pending_ota_operation_target.id == target.id
+    end
+  end
+
+  describe "format_operation_failure_log/2" do
+    test "fetches the latest error event across aggregated deployment resources", %{
+      tenant: tenant
+    } do
+      release = release_fixture(tenant: tenant, containers: 1)
+      deployment = deployment_fixture(tenant: tenant, release_id: release.id)
+
+      stub(ResourceEvent, :get, fn _client, _device_id, interface, _resource_id, [] ->
+        case interface do
+          "io.edgehog.devicemanager.apps.DeploymentEvent" ->
+            {:ok,
+             [
+               %ResourceEvent.Data{
+                 status: "Stopped",
+                 message: "Deployment stopped",
+                 add_info: [],
+                 timestamp: ~U[2026-03-19 10:05:00Z]
+               },
+               %ResourceEvent.Data{
+                 status: "Error",
+                 message: "Older deployment failure",
+                 add_info: [],
+                 timestamp: ~U[2026-03-19 10:01:00Z]
+               }
+             ]}
+
+          "io.edgehog.devicemanager.apps.ImageEvent" ->
+            {:ok,
+             [
+               %ResourceEvent.Data{
+                 status: "Error",
+                 message: "Image pull failed",
+                 add_info: ["404 Not Found"],
+                 timestamp: ~U[2026-03-19 10:03:00Z]
+               }
+             ]}
+
+          _ ->
+            {:ok, []}
+        end
+      end)
+
+      assert %{status: :error, message: "Image pull failed"} =
+               Helpers.get_latest_error_for_deployment(deployment.tenant_id, deployment.id)
+
+      assert :ok = MechanismCore.format_operation_failure_log(%DeploymentDeploy{}, deployment)
+    end
+
+    test "returns nil when no error events exist", %{tenant: tenant} do
+      deployment = deployment_fixture(tenant: tenant)
+
+      stub(ResourceEvent, :get, fn _client, _device_id, _interface, _resource_id, [] ->
+        {:ok, []}
+      end)
+
+      assert Helpers.get_latest_error_for_deployment(deployment.tenant_id, deployment.id) == nil
+      assert :ok = MechanismCore.format_operation_failure_log(%DeploymentDeploy{}, deployment)
     end
   end
 

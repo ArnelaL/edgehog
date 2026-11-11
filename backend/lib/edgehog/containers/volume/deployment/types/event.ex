@@ -26,6 +26,10 @@ defmodule Edgehog.Containers.Volume.Deployment.Types.Event do
     subtype_of: :map,
     constraints: [
       fields: [
+        resource_id: [
+          type: Edgehog.Containers.Types.RelayId,
+          description: "The GraphQL Relay ID of the resource deployment that emitted this event."
+        ],
         status: [
           type: Edgehog.Containers.Volume.Deployment.Types.EventStatus,
           description: "The status value reported by the device for this volume event."

@@ -32,7 +32,7 @@ defmodule Edgehog.Containers.Calculations.ResourceEvents do
 
   @impl Calculation
   def load(_query, opts, _context) do
-    [opts[:resource_id_key], device: [:device_id, :appengine_client]]
+    Enum.uniq([:id, opts[:resource_id_key], device: [:device_id, :appengine_client]])
   end
 
   @impl Calculation
@@ -50,34 +50,53 @@ defmodule Edgehog.Containers.Calculations.ResourceEvents do
         appengine_client: appengine_client
       } = deployment.device
 
-      resource_id =
-        deployment
-        |> Map.fetch!(resource_id_key)
-        |> to_string()
-
-      with :ok <- validate_appengine_client_exist(appengine_client),
-           {:ok, events} <-
-             @resource_event_module.get(
-               appengine_client,
-               device_id,
-               interface,
-               resource_id,
-               query
-             ) do
-        Enum.map(events, &cast_event!(&1, event_type))
-      else
+      case fetch_events(
+             appengine_client,
+             device_id,
+             deployment,
+             interface,
+             resource_id_key,
+             event_type,
+             query
+           ) do
+        {:ok, events} -> events
         {:error, _reason} -> nil
       end
     end)
   end
 
-  defp validate_appengine_client_exist(nil), do: {:error, message: "Cannot load appengine client. Maybe a misconfiguration?"}
-  defp validate_appengine_client_exist(_), do: :ok
+  def fetch_events(
+        appengine_client,
+        device_id,
+        record,
+        interface,
+        resource_id_key,
+        event_type,
+        query \\ []
+      ) do
+    resource_id =
+      record
+      |> Map.fetch!(resource_id_key)
+      |> to_string()
 
-  defp cast_event!(event, event_type) do
+    with :ok <- validate_appengine_client_exist(appengine_client),
+         {:ok, events} <-
+           @resource_event_module.get(
+             appengine_client,
+             device_id,
+             interface,
+             resource_id,
+             query
+           ) do
+      {:ok, Enum.map(events, &cast_event!(record, &1, event_type))}
+    end
+  end
+
+  def cast_event!(record, event, event_type) do
     input = %{
+      resource_id: AshGraphql.Resource.encode_relay_id(record),
       status: Macro.underscore(event.status),
-      message: event.message,
+      message: event.message || "",
       add_info: event.add_info || [],
       timestamp: event.timestamp
     }
@@ -85,6 +104,11 @@ defmodule Edgehog.Containers.Calculations.ResourceEvents do
     {:ok, value} = Ash.Type.cast_input(event_type, input, event_type.subtype_constraints())
     value
   end
+
+  defp validate_appengine_client_exist(nil),
+    do: {:error, message: "Cannot load appengine client. Maybe a misconfiguration?"}
+
+  defp validate_appengine_client_exist(_), do: :ok
 
   defp maybe_add_limit(opts, nil), do: opts
   defp maybe_add_limit(opts, limit), do: [{:limit, limit} | opts]

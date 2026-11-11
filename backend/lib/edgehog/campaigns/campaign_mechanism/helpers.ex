@@ -29,6 +29,9 @@ defmodule Edgehog.Campaigns.CampaignMechanism.Helpers do
   alias Edgehog.Campaigns
   alias Edgehog.Campaigns.CampaignMechanism.Helpers
   alias Edgehog.Containers
+  alias Edgehog.Containers.Release.Deployment
+
+  require Ash.Query
 
   @doc """
   Checks if an application is deployed on the target device for a given release.
@@ -118,5 +121,18 @@ defmodule Edgehog.Campaigns.CampaignMechanism.Helpers do
 
   def resolve_file_binds(target, configs) do
     Helpers.FileBindsResolver.resolve(configs, target.device_id, target.tenant_id)
+  end
+
+  @doc """
+  Fetches the latest error event for a deployment across the deployment and its child resources.
+  """
+  def get_latest_error_for_deployment(tenant_id, deployment_id) do
+    case Deployment
+         |> Ash.Query.filter(id == ^deployment_id)
+         |> Ash.Query.load(events: %{only_errors: true, limit: 1})
+         |> Ash.read_one(tenant: tenant_id) do
+      {:ok, %Deployment{events: [%Ash.Union{value: event} | _]}} -> event
+      _ -> nil
+    end
   end
 end

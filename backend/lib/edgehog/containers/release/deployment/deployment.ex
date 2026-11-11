@@ -25,15 +25,14 @@ defmodule Edgehog.Containers.Release.Deployment do
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
-  alias Edgehog.Containers.Calculations.ResourceEvents
   alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Containers.Release.Deployment.Calculations
   alias Edgehog.Containers.Release.Deployment.Changes
+  alias Edgehog.Containers.Release.Deployment.Types.AggregatedEvent
   alias Edgehog.Containers.Release.Deployment.Types.DeploymentContext
   alias Edgehog.Containers.Release.Deployment.Types.DeploymentState
-  alias Edgehog.Containers.Release.Deployment.Types.Event
   alias Edgehog.Containers.Release.Deployment.Validations
   alias Edgehog.Containers.Types
   alias Edgehog.Containers.Validations.IsUpgrade
@@ -339,13 +338,19 @@ defmodule Edgehog.Containers.Release.Deployment do
     end
 
     calculate :events,
-              {:array, Event},
-              {ResourceEvents,
-               interface: "io.edgehog.devicemanager.apps.DeploymentEvent",
-               resource_id_key: :id,
-               event_type: Event} do
-      description "Lifecycle events reported by the device for this deployment."
+              {:array, AggregatedEvent},
+              Calculations.Events do
+      description "Aggregated lifecycle events reported by the device for this deployment and all of its child resources."
       public? true
+
+      argument :limit, :integer do
+        constraints min: 1
+      end
+
+      argument :only_errors, :boolean do
+        allow_nil? false
+        default false
+      end
     end
   end
 

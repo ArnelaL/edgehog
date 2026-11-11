@@ -26,6 +26,10 @@ defmodule Edgehog.Containers.EnvFile.Types.Event do
     subtype_of: :map,
     constraints: [
       fields: [
+        resource_id: [
+          type: Edgehog.Containers.Types.RelayId,
+          description: "The GraphQL Relay ID of the resource deployment that emitted this event."
+        ],
         status: [
           type: Edgehog.Containers.EnvFile.Types.EventStatus,
           description: "The status value reported by the device for this env file event."

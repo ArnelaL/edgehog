@@ -33,7 +33,6 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
   alias Edgehog.Containers
   alias Edgehog.Containers.Release.Deployment
 
-  require Ash.Query
   require Logger
 
   # Operation Tracking
@@ -274,7 +273,7 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
   """
   def format_operation_failure_log(mechanism, operation) do
     latest_error_message =
-      case get_latest_error_for_deployment!(operation.tenant_id, operation.id) do
+      case Helpers.get_latest_error_for_deployment(operation.tenant_id, operation.id) do
         %{message: message} -> message
         nil -> "Could not find any error event."
       end
@@ -282,22 +281,6 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     Logger.notice(
       "Device #{operation.device_id} #{mechanism.type} operation failed: #{latest_error_message}"
     )
-  end
-
-  defp get_latest_error_for_deployment!(tenant_id, deployment_id) do
-    case Deployment
-         |> Ash.Query.filter(id == ^deployment_id)
-         |> Ash.Query.load(:events)
-         |> Ash.read_one(tenant: tenant_id) do
-      {:ok, %Deployment{events: events}} when is_list(events) ->
-        events
-        |> Enum.filter(&(&1.status == :error))
-        |> Enum.sort_by(& &1.timestamp, {:desc, DateTime})
-        |> List.first()
-
-      _ ->
-        nil
-    end
   end
 
   # Delegate common functions to Any implementation
