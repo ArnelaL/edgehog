@@ -297,19 +297,8 @@ const CAMPAIGN_TARGETS_UPDATED_SUBSCRIPTION = graphql`
         deployment {
           state
           isReady
-          events(
-            filter: { type: { eq: ERROR } }
-            sort: [{ field: INSERTED_AT, order: DESC }]
-            first: 1
-          ) {
-            edges {
-              node {
-                message
-                type
-                insertedAt
-                addInfo
-              }
-            }
+          events(onlyErrors: true, limit: 1) {
+            ...deploymentResourceEvents_eventFields @relay(mask: false)
           }
         }
       }

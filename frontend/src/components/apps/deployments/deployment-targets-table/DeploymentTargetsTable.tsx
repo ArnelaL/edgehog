@@ -31,6 +31,7 @@ import type {
 import DeploymentEventMessage from "@/components/apps/deployments/deployment-event-message/DeploymentEventMessage";
 import DeploymentReadiness from "@/components/apps/deployments/deployment-readiness/DeploymentReadiness";
 import DeploymentStateComponent from "@/components/apps/deployments/deployment-state/DeploymentState";
+import { findLatestErrorEvent } from "@/components/apps/deployments/deploymentResourceEvents";
 import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
 import { createColumnHelper } from "@/components/ui/table/Table";
 import { Link, Route } from "@/Navigation";
@@ -52,19 +53,8 @@ const CAMPAIGN_TARGETS_TABLE_FRAGMENT = graphql`
         deployment {
           state
           isReady
-          events(
-            filter: { type: { eq: ERROR } }
-            sort: [{ field: INSERTED_AT, order: DESC }]
-            first: 1
-          ) {
-            edges {
-              node {
-                message
-                type
-                insertedAt
-                addInfo
-              }
-            }
+          events(onlyErrors: true, limit: 1) {
+            ...deploymentResourceEvents_eventFields @relay(mask: false)
           }
         }
       }
@@ -160,8 +150,7 @@ const columns = [
     },
   ),
   columnHelper.accessor(
-    (campaignTarget) =>
-      campaignTarget.deployment?.events?.edges?.[0]?.node ?? null,
+    (campaignTarget) => findLatestErrorEvent(campaignTarget.deployment?.events),
     {
       id: "lastErrorMessage",
       header: () => (

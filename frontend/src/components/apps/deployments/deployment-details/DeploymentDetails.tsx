@@ -20,26 +20,35 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Badge, Card, Col, Row } from "react-bootstrap";
 import Tree, { useTreeState } from "react-hyper-tree";
 import { FormattedMessage, useIntl } from "react-intl";
-import { graphql, useFragment, usePaginationFragment } from "react-relay";
+import {
+  graphql,
+  useFragment,
+  usePaginationFragment,
+  useSubscription,
+} from "react-relay";
 
 import type { Deployment_getDeployment_Query$data } from "@/api/__generated__/Deployment_getDeployment_Query.graphql";
 import type { DeploymentContainerDeploymentsPaginationQuery } from "@/api/__generated__/DeploymentContainerDeploymentsPaginationQuery.graphql";
 import type { DeploymentDetails_containerDeployments$key } from "@/api/__generated__/DeploymentDetails_containerDeployments.graphql";
 import type { DeploymentDetails_deviceMappingDeployments$key } from "@/api/__generated__/DeploymentDetails_deviceMappingDeployments.graphql";
 import type { DeploymentDetails_deviceRequestDeployments$key } from "@/api/__generated__/DeploymentDetails_deviceRequestDeployments.graphql";
-import type {
-  DeploymentDetails_events$data,
-  DeploymentDetails_events$key,
-} from "@/api/__generated__/DeploymentDetails_events.graphql";
+import type { DeploymentDetails_events$key } from "@/api/__generated__/DeploymentDetails_events.graphql";
 import type { DeploymentDetails_fileBinds$key } from "@/api/__generated__/DeploymentDetails_fileBinds.graphql";
 import type { DeploymentDetails_envFiles$key } from "@/api/__generated__/DeploymentDetails_envFiles.graphql";
 import type { DeploymentDetails_networkDeployments$key } from "@/api/__generated__/DeploymentDetails_networkDeployments.graphql";
+import type {
+  DeploymentDetails_releaseDeploymentEvents_Subscription,
+  DeploymentDetails_releaseDeploymentEvents_Subscription$data,
+} from "@/api/__generated__/DeploymentDetails_releaseDeploymentEvents_Subscription.graphql";
 import type { DeploymentDetails_volumeDeployments$key } from "@/api/__generated__/DeploymentDetails_volumeDeployments.graphql";
-import type { DeploymentEventsPaginationQuery } from "@/api/__generated__/DeploymentEventsPaginationQuery.graphql";
 
 import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
 import DeploymentActionButtons from "@/components/apps/deployments/deployment-action-buttons/DeploymentActionButtons";
 import DeploymentEventsCard from "@/components/apps/deployments/deployment-events-card/DeploymentEventsCard";
+import {
+  normalizeUnionEvent,
+  type Event,
+} from "@/components/apps/deployments/deploymentResourceEvents";
 import { parseDeploymentState } from "@/components/apps/deployments/deployment-state/DeploymentState";
 import Icon from "@/components/ui/icon/Icon";
 import ResourceState from "@/components/apps/resource-state/ResourceState";
@@ -49,27 +58,14 @@ import UpgradeDeploymentModal from "@/components/apps/deployments/upgrade-deploy
 
 /* eslint-disable relay/unused-fields */
 const DEPLOYMENT_DETAILS_EVENTS_FRAGMENT = graphql`
-  fragment DeploymentDetails_events on Deployment
-  @refetchable(queryName: "DeploymentEventsPaginationQuery") {
+  fragment DeploymentDetails_events on Deployment {
     id
-    events(
-      first: $first
-      after: $after
-      sort: [{ field: INSERTED_AT, order: DESC }]
-    ) @connection(key: "DeploymentDetails_events") {
-      edges {
-        node {
-          type
-          message
-          addInfo
-          insertedAt
-        }
-      }
+    events {
+      ...deploymentResourceEvents_eventFields @relay(mask: false)
     }
   }
 `;
 
-/* eslint-disable relay/unused-fields */
 const DEPLOYMENT_DETAILS_CONTAINER_DEPLOYMENTS_FRAGMENT = graphql`
   fragment DeploymentDetails_containerDeployments on Deployment
   @refetchable(queryName: "DeploymentContainerDeploymentsPaginationQuery") {
@@ -86,6 +82,7 @@ const DEPLOYMENT_DETAILS_CONTAINER_DEPLOYMENTS_FRAGMENT = graphql`
             }
           }
           imageDeployment {
+            id
             state
             isReady
             image {
@@ -187,7 +184,65 @@ const DEPLOYMENT_DETAILS_VOLUME_DEPLOYMENTS_FRAGMENT = graphql`
   }
 `;
 
-/* eslint-disable relay/unused-fields */
+const RELEASE_DEPLOYMENT_EVENTS_SUBSCRIPTION = graphql`
+  subscription DeploymentDetails_releaseDeploymentEvents_Subscription(
+    $id: ID!
+  ) {
+    releaseDeploymentEvents(id: $id) {
+      __typename
+      ... on DeploymentEvent {
+        resourceId
+        deploymentStatus: status
+        message
+        addInfo
+        timestamp
+      }
+      ... on ContainerDeploymentEvent {
+        resourceId
+        containerStatus: status
+        message
+        addInfo
+        timestamp
+      }
+      ... on ImageDeploymentEvent {
+        resourceId
+        imageStatus: status
+        message
+        addInfo
+        timestamp
+      }
+      ... on VolumeDeploymentEvent {
+        resourceId
+        volumeStatus: status
+        message
+        addInfo
+        timestamp
+      }
+      ... on NetworkDeploymentEvent {
+        resourceId
+        networkStatus: status
+        message
+        addInfo
+        timestamp
+      }
+      ... on EnvFileEvent {
+        resourceId
+        envFileStatus: status
+        message
+        addInfo
+        timestamp
+      }
+      ... on FileBindEvent {
+        resourceId
+        fileBindStatus: status
+        message
+        addInfo
+        timestamp
+      }
+    }
+  }
+`;
+
 const DEPLOYMENT_DETAILS_DEVICE_MAPPING_DEPLOYMENTS_FRAGMENT = graphql`
   fragment DeploymentDetails_deviceMappingDeployments on ContainerDeployment {
     id
@@ -233,10 +288,6 @@ const DEPLOYMENT_DETAILS_DEVICE_REQUEST_DEPLOYMENTS_FRAGMENT = graphql`
 `;
 
 type Deployment = Deployment_getDeployment_Query$data["deployment"];
-
-export type Event = NonNullable<
-  NonNullable<DeploymentDetails_events$data["events"]["edges"]>[number]["node"]
->;
 
 type TreeNode = {
   id: string;
@@ -617,19 +668,20 @@ const DeploymentDetails = ({
   onRedeploy,
   onDelete,
 }: DeploymentDetailsProps) => {
-  const { data: eventsData } = usePaginationFragment<
-    DeploymentEventsPaginationQuery,
-    DeploymentDetails_events$key
-  >(DEPLOYMENT_DETAILS_EVENTS_FRAGMENT, deploymentRef);
+  const eventsData = useFragment<DeploymentDetails_events$key>(
+    DEPLOYMENT_DETAILS_EVENTS_FRAGMENT,
+    deploymentRef,
+  );
 
   const { data: containersData } = usePaginationFragment<
     DeploymentContainerDeploymentsPaginationQuery,
     DeploymentDetails_containerDeployments$key
   >(DEPLOYMENT_DETAILS_CONTAINER_DEPLOYMENTS_FRAGMENT, deploymentRef);
 
-  const events = eventsData?.events?.edges?.map((e) => e.node) ?? [];
-  const containerNodes =
-    containersData?.containerDeployments?.edges?.map((e) => e.node) ?? [];
+  const containerNodes = useMemo(
+    () => containersData?.containerDeployments?.edges?.map((e) => e.node) ?? [],
+    [containersData],
+  );
 
   const {
     release,
@@ -637,6 +689,58 @@ const DeploymentDetails = ({
     isReady = false,
     id: deploymentId,
   } = deploymentRef || {};
+
+  const [liveEvents, setLiveEvents] = useState<Event[]>([]);
+
+  const subscriptionConfig = useMemo(
+    () => ({
+      subscription: RELEASE_DEPLOYMENT_EVENTS_SUBSCRIPTION,
+      variables: { id: deploymentId ?? "" },
+      onNext: (
+        response:
+          | DeploymentDetails_releaseDeploymentEvents_Subscription$data
+          | null
+          | undefined,
+      ) => {
+        const newEvent = normalizeUnionEvent(response?.releaseDeploymentEvents);
+        if (!newEvent) return;
+
+        setLiveEvents((prev) => [newEvent, ...prev]);
+      },
+    }),
+    [deploymentId],
+  );
+
+  useSubscription<DeploymentDetails_releaseDeploymentEvents_Subscription>(
+    subscriptionConfig,
+  );
+
+  const events = useMemo(() => {
+    const initialEvents: Event[] = [];
+    for (const rawEvent of eventsData?.events ?? []) {
+      const normalized = normalizeUnionEvent(rawEvent);
+      if (normalized) {
+        initialEvents.push(normalized);
+      }
+    }
+
+    const seenEvents = new Set<string>();
+    const uniqueEvents: Event[] = [];
+
+    for (const event of [...liveEvents, ...initialEvents]) {
+      const key = `${event.__typename}:${event.resourceId}:${event.status}:${event.timestamp ?? ""}:${event.message}:${(event.addInfo ?? []).join("\n")}`;
+      if (!seenEvents.has(key)) {
+        seenEvents.add(key);
+        uniqueEvents.push(event);
+      }
+    }
+
+    return uniqueEvents.sort((a, b) => {
+      const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+      const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+      return timeB - timeA;
+    });
+  }, [eventsData, liveEvents]);
 
   const {
     application,
