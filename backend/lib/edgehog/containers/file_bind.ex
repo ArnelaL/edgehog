@@ -28,6 +28,11 @@ defmodule Edgehog.Containers.FileBind do
   alias Edgehog.Containers.FileBind.Calculations
   alias Edgehog.Containers.FileBind.Changes
 
+  audit_log do
+    action_types [:update]
+    actions [:create, :destroy]
+  end
+
   graphql do
     type :file_bind
   end

@@ -27,6 +27,11 @@ defmodule Edgehog.Files.File do
   alias Edgehog.Files.File.Changes
   alias Edgehog.Files.File.FileData
 
+  audit_log do
+    action_types [:update]
+    actions [:create, :destroy]
+  end
+
   graphql do
     type :file
   end

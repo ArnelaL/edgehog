@@ -33,6 +33,16 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade do
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.Types
 
+  @derive {Jason.Encoder,
+           only: [
+             :type,
+             :max_failure_percentage,
+             :max_in_progress_operations,
+             :request_retries,
+             :request_timeout_seconds,
+             :configs
+           ]}
+
   resource do
     description """
     An object representing the properties of a Upgrade deployment campaign mechanism.

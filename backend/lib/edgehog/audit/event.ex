@@ -24,7 +24,8 @@ defmodule Edgehog.Audit.Event do
   """
   use Edgehog.MultitenantResource,
     domain: Edgehog.Audit,
-    extensions: [AshGraphql.Resource]
+    extensions: [AshGraphql.Resource],
+    audit?: false
 
   alias Edgehog.Audit.Types
 

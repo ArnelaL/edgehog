@@ -32,6 +32,11 @@ defmodule Edgehog.Containers.EnvFile do
   alias Edgehog.Files.DeviceFile
   alias Edgehog.Files.FileDownloadRequest
 
+  audit_log do
+    action_types [:update]
+    actions [:create, :destroy]
+  end
+
   graphql do
     type :env_file
   end

@@ -32,6 +32,15 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentStop do
 
   alias Edgehog.Containers.Release
 
+  @derive {Jason.Encoder,
+           only: [
+             :type,
+             :max_failure_percentage,
+             :max_in_progress_operations,
+             :request_retries,
+             :request_timeout_seconds
+           ]}
+
   resource do
     description """
     An object representing the properties of a Stop deployment campaign mechanism.
