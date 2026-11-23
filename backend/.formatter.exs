@@ -23,6 +23,10 @@
     assert_updated: 3,
     triggers: 1,
     trigger: 1,
-    handler: 1
+    handler: 1,
+    audit_log: 0,
+    action_types: 1,
+    actions: 1,
+    actor?: 1
   ]
 ]
