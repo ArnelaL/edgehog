@@ -67,28 +67,22 @@ defmodule Edgehog.Audit.Preparations.RegisterEvent do
   end
 
   defp attach_hooks(subject, opts, context) do
-    subject
-    |> Ash.Subject.after_action(fn subject, result ->
-      register_success(subject, result, opts, context)
-    end)
-    |> Ash.Subject.after_transaction(fn
+    Ash.Subject.after_transaction(subject, fn
       subject, {:error, error} ->
         register_failure(subject, error, opts, context)
         {:error, error}
 
-      _subject, result ->
+      subject, result ->
+        register_success(subject, opts, context)
         result
     end)
   end
 
-  defp register_success(subject, result, opts, context) do
+  defp register_success(subject, opts, context) do
     info = event_info(subject, opts, context)
     message = "Running #{subject.resource}.#{subject.action.name}"
 
     register_event(&AuditService.info/2, message, info, context, opts[:metadata])
-
-    # actions with no return type must receive :ok from the hook, not {:ok, result}
-    if subject.action.returns, do: {:ok, result}, else: :ok
   end
 
   defp register_failure(subject, error, opts, context) do
