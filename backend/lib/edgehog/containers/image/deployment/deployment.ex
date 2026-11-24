@@ -37,7 +37,12 @@ defmodule Edgehog.Containers.Image.Deployment do
   end
 
   actions do
-    defaults [:read, :destroy, create: [:image_id, :device_id, :state]]
+    defaults [
+      :read,
+      :destroy,
+      create: [:image_id, :device_id, :state],
+      update: [:status, :docker_image_id, :repo_tags, :repo_digests, :size]
+    ]
 
     create :deploy do
       description """
@@ -116,6 +121,26 @@ defmodule Edgehog.Containers.Image.Deployment do
         one_of: [:created, :sent, :pulled, :unpulled, :error]
       ],
       public?: true
+
+    attribute :docker_image_id, :string do
+      public? true
+    end
+
+    attribute :repo_tags, {:array, :string} do
+      public? true
+    end
+
+    attribute :repo_digests, {:array, :string} do
+      public? true
+    end
+
+    attribute :size, :integer do
+      public? true
+    end
+
+    attribute :status, :string do
+      public? true
+    end
 
     timestamps()
   end
