@@ -2561,6 +2561,12 @@
   "components.ui.table.Table.showing": {
     "defaultMessage": "Showing {start} to {end} of {total} entries"
   },
+  "contexts.TenantConfig.error.description": {
+    "defaultMessage": "Please verify that the app is set up correctly."
+  },
+  "contexts.TenantConfig.error.title": {
+    "defaultMessage": "Could not fetch remote configuration."
+  },
   "forms.CreateAllowedRegistry.registryLabel": {
     "defaultMessage": "Registry Host"
   },
@@ -4970,11 +4976,29 @@
   "navigation.routeTitle.VolumesNew": {
     "defaultMessage": "Create Volumes"
   },
+  "pages.AllowedRegistries.confirmConfigUpdate.confirm": {
+    "defaultMessage": "Confirm"
+  },
+  "pages.AllowedRegistries.confirmConfigUpdate.disable": {
+    "defaultMessage": "Are you sure you want to disable enforcement of allowed registries? Containers will no longer be restricted to images from registries included in the allowed registries list."
+  },
+  "pages.AllowedRegistries.confirmConfigUpdate.enable": {
+    "defaultMessage": "Are you sure you want to enforce allowed registries? Containers will only be able to use images from registries included in the allowed registries list."
+  },
+  "pages.AllowedRegistries.confirmConfigUpdate.title": {
+    "defaultMessage": "Confirm configuration change"
+  },
   "pages.AllowedRegistries.createButton": {
     "defaultMessage": "Create Allowed Registry"
   },
+  "pages.AllowedRegistries.enforceAllowedRegistriesLabel": {
+    "defaultMessage": "Enforce allowed registries"
+  },
   "pages.AllowedRegistries.title": {
     "defaultMessage": "Allowed Registries"
+  },
+  "pages.AllowedRegistries.updateConfigError": {
+    "defaultMessage": "Could not update the tenant configuration, please try again."
   },
   "pages.AllowedRegistry.allowedRegistryNotFound.message": {
     "defaultMessage": "Return to the Allowed Registries list."

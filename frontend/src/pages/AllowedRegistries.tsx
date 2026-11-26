@@ -19,26 +19,31 @@
  */
 
 import { Suspense, useCallback, useEffect, useState } from "react";
+import { Alert, Card, Form } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import {
   graphql,
   PreloadedQuery,
+  useMutation,
   usePaginationFragment,
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay";
-import { Card } from "react-bootstrap";
 
 import type { AllowedRegistries_getAllowedRegistries_Query } from "@/api/__generated__/AllowedRegistries_getAllowedRegistries_Query.graphql";
-import { AllowedRegistries_AllowedRegistriesFragment$key } from "@/api/__generated__/AllowedRegistries_AllowedRegistriesFragment.graphql";
-import { AllowedRegistries_PaginationQuery } from "@/api/__generated__/AllowedRegistries_PaginationQuery.graphql";
+import type { AllowedRegistries_AllowedRegistriesFragment$key } from "@/api/__generated__/AllowedRegistries_AllowedRegistriesFragment.graphql";
+import type { AllowedRegistries_PaginationQuery } from "@/api/__generated__/AllowedRegistries_PaginationQuery.graphql";
+import type { AllowedRegistries_updateTenantConfig_Mutation } from "@/api/__generated__/AllowedRegistries_updateTenantConfig_Mutation.graphql";
 
+import AllowedRegistriesTable from "@/components/apps/containers/allowed-registries-table/AllowedRegistriesTable";
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
-import AllowedRegistriesTable from "@/components/apps/containers/allowed-registries-table/AllowedRegistriesTable";
+import ConfirmModal from "@/components/ui/confirm-modal/ConfirmModal";
 import Page from "@/components/ui/page/Page";
 import Spinner from "@/components/ui/spinner/Spinner";
+
+import { useTenantConfig } from "@/contexts/TenantConfig";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
@@ -65,6 +70,21 @@ const ALLOWED_REGISTRIES_FRAGMENT = graphql`
         }
       }
       ...AllowedRegistriesTable_AllowedRegistryEdgeFragment
+    }
+  }
+`;
+
+const UPDATE_TENANT_CONFIG_MUTATION = graphql`
+  mutation AllowedRegistries_updateTenantConfig_Mutation(
+    $input: UpdateTenantConfigInput!
+  ) {
+    updateTenantConfig(input: $input) {
+      result {
+        id
+        config {
+          enforceAllowedRegistries
+        }
+      }
     }
   }
 `;
@@ -126,12 +146,79 @@ interface AllowedRegistriesContentProps {
 const AllowedRegistriesContent = ({
   getAllowedRegistriesQuery,
 }: AllowedRegistriesContentProps) => {
+  const intl = useIntl();
   const [searchText, setSearchText] = useState<string | null>(null);
+  const [errorFeedback, setErrorFeedback] = useState<string | null>(null);
+
+  const { config, refresh } = useTenantConfig();
+  const isEnforced = config?.enforceAllowedRegistries ?? false;
+
+  const [pendingEnforceAllowedRegistries, setPendingEnforceAllowedRegistries] =
+    useState<boolean | null>(null);
+
   const allowedRegistriesData =
     usePreloadedQuery<AllowedRegistries_getAllowedRegistries_Query>(
       GET_ALLOWED_REGISTRIES_QUERY,
       getAllowedRegistriesQuery,
     );
+
+  const [updateTenantConfig, isUpdatingTenantConfig] =
+    useMutation<AllowedRegistries_updateTenantConfig_Mutation>(
+      UPDATE_TENANT_CONFIG_MUTATION,
+    );
+
+  const handleUpdateTenantConfig = useCallback(
+    (newEnforceAllowedRegistries: boolean) => {
+      updateTenantConfig({
+        variables: {
+          input: {
+            config: { enforceAllowedRegistries: newEnforceAllowedRegistries },
+          },
+        },
+        onCompleted(_data, errors) {
+          setPendingEnforceAllowedRegistries(null);
+
+          if (errors?.length) {
+            setErrorFeedback(
+              errors
+                .map(({ fields, message }) =>
+                  fields.length ? `${fields.join(" ")} ${message}` : message,
+                )
+                .join(". \n"),
+            );
+            return;
+          }
+
+          setErrorFeedback(null);
+
+          void refresh();
+        },
+        onError() {
+          setPendingEnforceAllowedRegistries(null);
+          setErrorFeedback(
+            intl.formatMessage({
+              id: "pages.AllowedRegistries.updateConfigError",
+              defaultMessage:
+                "Could not update the tenant configuration, please try again.",
+            }),
+          );
+        },
+      });
+    },
+    [intl, refresh, updateTenantConfig],
+  );
+
+  const handleConfirmTenantConfigUpdate = useCallback(() => {
+    if (pendingEnforceAllowedRegistries === null) {
+      return;
+    }
+
+    handleUpdateTenantConfig(pendingEnforceAllowedRegistries);
+  }, [pendingEnforceAllowedRegistries, handleUpdateTenantConfig]);
+
+  const handleCancelTenantConfigUpdate = useCallback(() => {
+    setPendingEnforceAllowedRegistries(null);
+  }, []);
 
   return (
     <Page>
@@ -143,21 +230,81 @@ const AllowedRegistriesContent = ({
           />
         }
       >
-        <Button as={Link} route={Route.allowedRegistriesNew}>
-          <FormattedMessage
-            id="pages.AllowedRegistries.createButton"
-            defaultMessage="Create Allowed Registry"
+        <div className="d-flex align-items-center gap-3">
+          <Form.Check
+            type="switch"
+            id="enforce-allowed-registries"
+            label={
+              <FormattedMessage
+                id="pages.AllowedRegistries.enforceAllowedRegistriesLabel"
+                defaultMessage="Enforce allowed registries"
+              />
+            }
+            checked={isEnforced}
+            disabled={isUpdatingTenantConfig}
+            onChange={(event) =>
+              setPendingEnforceAllowedRegistries(event.target.checked)
+            }
           />
-        </Button>
+
+          <Button as={Link} route={Route.allowedRegistriesNew}>
+            <FormattedMessage
+              id="pages.AllowedRegistries.createButton"
+              defaultMessage="Create Allowed Registry"
+            />
+          </Button>
+        </div>
       </Page.Header>
+
       <Page.Main>
-        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+        <Alert
+          show={!!errorFeedback}
+          variant="danger"
+          dismissible
+          onClose={() => setErrorFeedback(null)}
+        >
+          {errorFeedback}
+        </Alert>
+
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
           <AllowedRegistriesLayoutContainer
             allowedRegistriesData={allowedRegistriesData}
             searchText={searchText}
             onSearchChange={setSearchText}
           />
         </Card>
+
+        <ConfirmModal
+          show={pendingEnforceAllowedRegistries !== null}
+          title={
+            <FormattedMessage
+              id="pages.AllowedRegistries.confirmConfigUpdate.title"
+              defaultMessage="Confirm configuration change"
+            />
+          }
+          confirmLabel={
+            <FormattedMessage
+              id="pages.AllowedRegistries.confirmConfigUpdate.confirm"
+              defaultMessage="Confirm"
+            />
+          }
+          confirmVariant="primary"
+          onConfirm={handleConfirmTenantConfigUpdate}
+          onCancel={handleCancelTenantConfigUpdate}
+          isConfirming={isUpdatingTenantConfig}
+        >
+          {pendingEnforceAllowedRegistries ? (
+            <FormattedMessage
+              id="pages.AllowedRegistries.confirmConfigUpdate.enable"
+              defaultMessage="Are you sure you want to enforce allowed registries? Containers will only be able to use images from registries included in the allowed registries list."
+            />
+          ) : (
+            <FormattedMessage
+              id="pages.AllowedRegistries.confirmConfigUpdate.disable"
+              defaultMessage="Are you sure you want to disable enforcement of allowed registries? Containers will no longer be restricted to images from registries included in the allowed registries list."
+            />
+          )}
+        </ConfirmModal>
       </Page.Main>
     </Page>
   );

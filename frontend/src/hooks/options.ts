@@ -24,6 +24,7 @@ import type { hooks_VolumesOptionsFragment$key } from "@/api/__generated__/hooks
 import { hooks_ContainersOptionsFragment$key } from "@/api/__generated__/hooks_ContainersOptionsFragment.graphql";
 import type { hooks_FilesOptionsFragment$key } from "@/api/__generated__/hooks_FilesOptionsFragment.graphql";
 import { hooks_SystemModelsOptionsFragment$key } from "@/api/__generated__/hooks_SystemModelsOptionsFragment.graphql";
+import { hooks_AllowedRegistriesOptionsFragment$key } from "@/api/__generated__/hooks_AllowedRegistriesOptionsFragment.graphql";
 
 type Option = {
   value: string;
@@ -112,6 +113,19 @@ export const FILES_OPTIONS_FRAGMENT = graphql`
               }
             }
           }
+        }
+      }
+    }
+  }
+`;
+
+export const ALLOWED_REGISTRIES_OPTIONS_FRAGMENT = graphql`
+  fragment hooks_AllowedRegistriesOptionsFragment on RootQueryType {
+    allowedRegistries {
+      edges {
+        node {
+          id
+          registry
         }
       }
     }
@@ -215,6 +229,27 @@ export const useContainerOptions = (
         {
           value: edge.node.id,
           label: edge.node.name,
+        },
+      ];
+    }) ?? []
+  );
+};
+
+export const useAllowedRegistriesOptions = (
+  queryRef: hooks_AllowedRegistriesOptionsFragment$key,
+): Option[] => {
+  const data = useFragment(ALLOWED_REGISTRIES_OPTIONS_FRAGMENT, queryRef);
+
+  return (
+    data.allowedRegistries?.edges?.flatMap((edge) => {
+      if (!edge?.node) {
+        return [];
+      }
+
+      return [
+        {
+          value: edge.node.registry,
+          label: edge.node.registry,
         },
       ];
     }) ?? []

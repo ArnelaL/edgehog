@@ -619,6 +619,17 @@ type DeploymentDeploy {
   release: Release
 }
 
+input TenantInfoConfigInput {
+  "Whether to enforce allowed registries for the tenant."
+  enforceAllowedRegistries: Boolean
+}
+
+"Describes the configuration of a tenant."
+type TenantConfig {
+  "Whether to enforce allowed registries for the tenant."
+  enforceAllowedRegistries: Boolean
+}
+
 """
 Describes the position of a device.
 
@@ -10782,6 +10793,20 @@ type OtaOperation {
   campaignTarget: CampaignTarget
 }
 
+"The result of the :update_tenant_config mutation"
+type UpdateTenantConfigResult {
+  "The successful result of the mutation"
+  result: TenantInfo
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateTenantConfigInput {
+  "The tenant configuration."
+  config: TenantInfoConfigInput
+}
+
 type TenantInfo {
   id: ID!
 
@@ -10793,6 +10818,9 @@ type TenantInfo {
 
   "The default locale supported by the tenant."
   defaultLocale: String!
+
+  "The tenant configuration."
+  config: TenantConfig
 }
 
 type channels_result {
@@ -12108,6 +12136,8 @@ type RootMutationType {
 
   "Deletes an channel."
   deleteChannel(id: ID!): DeleteChannelResult
+
+  updateTenantConfig(input: UpdateTenantConfigInput): UpdateTenantConfigResult
 
   """
   Initiates an OTA update, with a user provided OS image.

@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2021-2025 SECO Mind Srl
+ * Copyright 2021-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import AuthProvider from "@/contexts/Auth";
 import I18nProvider from "@/i18n";
 import App from "./App";
 import "./index.scss";
+import TenantConfigProvider from "./contexts/TenantConfig";
 
 function RelayProvider({ children }: { children: React.ReactNode }) {
   const { session } = useSession();
@@ -45,11 +46,13 @@ createRoot(document.getElementById("root")!).render(
     <SessionProvider>
       <RelayProvider>
         <AuthProvider fetchGraphQL={fetchGraphQL}>
-          <RouterProvider>
-            <I18nProvider>
-              <App />
-            </I18nProvider>
-          </RouterProvider>
+          <TenantConfigProvider>
+            <RouterProvider>
+              <I18nProvider>
+                <App />
+              </I18nProvider>
+            </RouterProvider>
+          </TenantConfigProvider>
         </AuthProvider>
       </RelayProvider>
     </SessionProvider>

@@ -33,6 +33,7 @@ import type { MockEnvironment } from "relay-test-utils";
 import type { FetchGraphQL } from "@/api";
 import SessionProvider from "@/contexts/Session";
 import AuthProvider from "@/contexts/Auth";
+import TenantConfigProvider from "@/contexts/TenantConfig";
 import I18nProvider from "@/i18n";
 
 // relay-test-utils expect to have a jest global https://github.com/facebook/relay/issues/4228
@@ -70,14 +71,16 @@ const renderWithProviders = (
       <SessionProvider>
         <RelayEnvironmentProvider environment={relayEnvironment}>
           <AuthProvider fetchGraphQL={fetchGraphQL}>
-            <RouterProvider initialEntries={[path]}>
-              <Routes>
-                <Route
-                  path={route}
-                  element={<I18nProvider>{props.children}</I18nProvider>}
-                ></Route>
-              </Routes>
-            </RouterProvider>
+            <TenantConfigProvider fetchGraphQL={fetchGraphQL}>
+              <RouterProvider initialEntries={[path]}>
+                <Routes>
+                  <Route
+                    path={route}
+                    element={<I18nProvider>{props.children}</I18nProvider>}
+                  ></Route>
+                </Routes>
+              </RouterProvider>
+            </TenantConfigProvider>
           </AuthProvider>
         </RelayEnvironmentProvider>
       </SessionProvider>

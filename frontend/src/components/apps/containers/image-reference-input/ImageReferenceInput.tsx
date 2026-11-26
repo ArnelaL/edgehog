@@ -27,6 +27,7 @@ import Form from "@/components/ui/form/Form";
 import { FormRow } from "@/components/ui/form-row/FormRow";
 import FormFeedback from "@/forms/FormFeedback";
 import type { ContainerInputData } from "@/forms/validation";
+import SelectFormField from "@/forms/SelectFormFIeld";
 
 type ImageSegments = {
   registryHost?: string | null;
@@ -71,9 +72,15 @@ const formatImageReference = (segments?: ImageSegments | null): string => {
 
 export type ImageReferenceInputProps = {
   form: UseFormReturn<ContainerInputData>;
+  enforceAllowedRegistries: boolean;
+  allowedRegistriesOptions: Array<{ value: string; label: string }>;
 };
 
-const ImageReferenceInput = ({ form }: ImageReferenceInputProps) => {
+const ImageReferenceInput = ({
+  form,
+  enforceAllowedRegistries,
+  allowedRegistriesOptions,
+}: ImageReferenceInputProps) => {
   const {
     register,
     control,
@@ -127,25 +134,46 @@ const ImageReferenceInput = ({ form }: ImageReferenceInputProps) => {
 
   return (
     <>
-      <FormRow
-        id="image-registry-host"
-        label={
-          <FormattedMessage
-            id="components.apps.containers.image-reference-input.ImageReferenceInput.registryHostLabel"
-            defaultMessage="Registry Host"
-          />
-        }
-      >
-        <FieldHelp id="imageRegistryHost">
-          <Form.Control
-            placeholder="e.g. docker.io"
-            {...register("image.registryHost")}
-            isInvalid={!!errors.image?.registryHost}
-          />
-          <FormFeedback feedback={errors.image?.registryHost?.message} />
-        </FieldHelp>
-      </FormRow>
-
+      {enforceAllowedRegistries ? (
+        <FormRow
+          id="image-registry-host"
+          label={
+            <FormattedMessage
+              id="components.apps.containers.image-reference-input.ImageReferenceInput.registryHostLabel"
+              defaultMessage="Registry Host"
+            />
+          }
+        >
+          <FieldHelp id="imageRegistryHost">
+            <SelectFormField
+              control={control}
+              name="image.registryHost"
+              options={allowedRegistriesOptions}
+              isClearable
+            />
+            <FormFeedback feedback={errors.image?.registryHost?.message} />
+          </FieldHelp>
+        </FormRow>
+      ) : (
+        <FormRow
+          id="image-registry-host"
+          label={
+            <FormattedMessage
+              id="components.apps.containers.image-reference-input.ImageReferenceInput.registryHostLabel"
+              defaultMessage="Registry Host"
+            />
+          }
+        >
+          <FieldHelp id="imageRegistryHost">
+            <Form.Control
+              placeholder="e.g. docker.io"
+              {...register("image.registryHost")}
+              isInvalid={!!errors.image?.registryHost}
+            />
+            <FormFeedback feedback={errors.image?.registryHost?.message} />
+          </FieldHelp>
+        </FormRow>
+      )}
       <FormRow
         id="image-registry-port"
         label={

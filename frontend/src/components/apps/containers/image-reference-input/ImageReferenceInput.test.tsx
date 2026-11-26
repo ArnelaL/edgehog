@@ -36,8 +36,12 @@ const VALID_DIGEST =
 
 const TestFormWrapper = ({
   defaultValues = { name: "test-container" },
+  enforceAllowedRegistries = false,
+  allowedRegistriesOptions = [],
 }: {
   defaultValues?: Partial<ContainerInputData>;
+  enforceAllowedRegistries?: boolean;
+  allowedRegistriesOptions?: Array<{ label: string; value: string }>;
 }) => {
   const form = useForm<ContainerInputData>({
     mode: "onTouched",
@@ -45,7 +49,13 @@ const TestFormWrapper = ({
     defaultValues,
   });
 
-  return <ImageReferenceInput form={form} />;
+  return (
+    <ImageReferenceInput
+      form={form}
+      enforceAllowedRegistries={enforceAllowedRegistries}
+      allowedRegistriesOptions={allowedRegistriesOptions}
+    />
+  );
 };
 
 describe("imageSchema validation", () => {
@@ -206,6 +216,20 @@ describe("ImageReferenceInput", () => {
     expect(screen.getByTestId("image-reference-preview")).toHaveValue(
       `alpine@${VALID_DIGEST}`,
     );
+  });
+
+  it("renders registry host dropdown when enforceAllowedRegistries is true", () => {
+    renderWithProviders(
+      <TestFormWrapper
+        enforceAllowedRegistries={true}
+        allowedRegistriesOptions={[
+          { label: "docker.io", value: "docker.io" },
+          { label: "ghcr.io", value: "ghcr.io" },
+        ]}
+      />,
+    );
+
+    expect(screen.getByRole("combobox")).toBeInTheDocument();
   });
 });
 

@@ -50,6 +50,7 @@ const GET_CREATE_CONTAINER_OPTIONS_QUERY = graphql`
     ...hooks_ImageCredentialsOptionsFragment
     ...hooks_NetworksOptionsFragment
     ...hooks_FilesOptionsFragment
+    ...hooks_AllowedRegistriesOptionsFragment
   }
 `;
 

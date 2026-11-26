@@ -57,6 +57,7 @@ import Icon from "@/components/ui/icon/Icon";
 import MonacoJsonEditor from "@/components/ui/monaco-json-editor/MonacoJsonEditor";
 import MultiSelect from "@/components/ui/multi-select/MultiSelect";
 import {
+  useAllowedRegistriesOptions,
   useFilesOptions,
   useImageCredentialOptions,
   useNetworkOptions,
@@ -74,6 +75,7 @@ import {
   KeyValue,
   type ContainerInputData,
 } from "@/forms/validation";
+import { useTenantConfig } from "@/contexts/TenantConfig";
 
 export const restartPolicyOptions = [
   { value: "no", label: "No" },
@@ -300,7 +302,8 @@ type ContainerOptionsQueryRef = Parameters<
 >[0] &
   Parameters<typeof useNetworkOptions>[0] &
   Parameters<typeof useVolumeOptions>[0] &
-  Parameters<typeof useFilesOptions>[0];
+  Parameters<typeof useFilesOptions>[0] &
+  Parameters<typeof useAllowedRegistriesOptions>[0];
 
 type BaseSectionProps = {
   form: UseFormReturn<ContainerInputData>;
@@ -344,7 +347,13 @@ const ImageSection = ({
 }: SectionWithQueryProps) => {
   const { control } = form;
 
+  const { config } = useTenantConfig();
+
   const imageCredentialsOptions = useImageCredentialOptions(queryRef);
+  const allAllowedRegistriesOptions = useAllowedRegistriesOptions(queryRef);
+  const allowedRegistriesOptions = config.enforceAllowedRegistries
+    ? allAllowedRegistriesOptions
+    : [];
 
   return (
     <Section
@@ -352,7 +361,11 @@ const ImageSection = ({
       onToggle={onToggle}
       label={messages.imageConfigSection}
     >
-      <ImageReferenceInput form={form} />
+      <ImageReferenceInput
+        form={form}
+        enforceAllowedRegistries={config.enforceAllowedRegistries ?? false}
+        allowedRegistriesOptions={allowedRegistriesOptions}
+      />
 
       <FormRow
         id="image-credentials"
