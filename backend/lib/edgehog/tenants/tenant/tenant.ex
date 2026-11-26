@@ -67,7 +67,7 @@ defmodule Edgehog.Tenants.Tenant do
 
     create :create do
       primary? true
-      accept [:name, :slug, :public_key, :default_locale]
+      accept [:name, :slug, :public_key, :default_locale, :config]
     end
 
     read :current_tenant do
@@ -87,7 +87,7 @@ defmodule Edgehog.Tenants.Tenant do
     end
 
     create :provision do
-      accept [:name, :slug, :public_key, :default_locale]
+      accept [:name, :slug, :public_key, :default_locale, :config]
       argument :astarte_config, AstarteConfig, allow_nil?: false
 
       change Tenant.Changes.ProvisionAstarteResources
@@ -102,6 +102,11 @@ defmodule Edgehog.Tenants.Tenant do
       end
 
       run Tenant.ManualActions.ReconcilerAction
+    end
+
+    update :update_config do
+      accept [:config]
+      require_atomic? false
     end
 
     destroy :destroy do
@@ -152,6 +157,11 @@ defmodule Edgehog.Tenants.Tenant do
       public? true
       description "The tenant public key."
       allow_nil? false
+    end
+
+    attribute :config, Edgehog.Tenants.Config do
+      public? true
+      description "The tenant configuration."
     end
 
     create_timestamp :inserted_at

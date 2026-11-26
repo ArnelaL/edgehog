@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,13 @@ defmodule Edgehog.Tenants do
 
     queries do
       read_one Tenant, :tenant_info, :current_tenant, allow_nil?: false
+    end
+
+    mutations do
+      update Tenant, :update_tenant_config, :update_config do
+        identity false
+        read_action :current_tenant
+      end
     end
   end
 
