@@ -35,6 +35,7 @@ defmodule Edgehog.Triggers.IncomingData do
   alias Edgehog.Triggers.IncomingData.Handlers.FileDeleteResponse
   alias Edgehog.Triggers.IncomingData.Handlers.FileStorage
   alias Edgehog.Triggers.IncomingData.Handlers.FileTransfer
+  alias Edgehog.Triggers.IncomingData.Handlers.ForwarderSessionState
   alias Edgehog.Triggers.IncomingData.Handlers.OTAEvent
   alias Edgehog.Triggers.IncomingData.Handlers.OTAResponse
   alias Edgehog.Triggers.IncomingData.Handlers.SystemInfo
@@ -106,6 +107,10 @@ defmodule Edgehog.Triggers.IncomingData do
 
     handler FileDeleteResponse do
       filter interface: "io.edgehog.devicemanager.storage.Response"
+    end
+
+    handler ForwarderSessionState do
+      filter interface: "io.edgehog.devicemanager.ForwarderSessionState"
     end
 
     handler Edgehog.Triggers.Handlers.Fallback

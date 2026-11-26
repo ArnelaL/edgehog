@@ -84,7 +84,14 @@ defmodule Edgehog.Devices.Device do
   end
 
   actions do
-    defaults [:read, :destroy]
+    defaults [:read]
+
+    destroy :destroy do
+      primary? true
+      require_atomic? false
+
+      change Changes.EmitFleetTelemetry
+    end
 
     create :create do
       primary? true
@@ -99,6 +106,8 @@ defmodule Edgehog.Devices.Device do
         :last_disconnection,
         :last_seen_ip
       ]
+
+      change Changes.EmitFleetTelemetry
     end
 
     create :from_device_connected_event do
@@ -110,6 +119,7 @@ defmodule Edgehog.Devices.Device do
       argument :device_id, :string, allow_nil?: false
       argument :timestamp, :datetime, allow_nil?: false
 
+      change Changes.EmitFleetTelemetry
       change Changes.InitializeFromDeviceStatus
       change Changes.SetupReconciler
       change Changes.DeployPending
@@ -131,6 +141,8 @@ defmodule Edgehog.Devices.Device do
       accept [:realm_id]
       argument :device_id, :string, allow_nil?: false
 
+      change Changes.EmitFleetTelemetry
+
       # Only if created
       change set_attribute(:device_id, arg(:device_id))
       change set_attribute(:name, arg(:device_id))
@@ -145,6 +157,7 @@ defmodule Edgehog.Devices.Device do
       argument :device_id, :string, allow_nil?: false
       argument :timestamp, :datetime, allow_nil?: false
 
+      change Changes.EmitFleetTelemetry
       change Changes.InitializeFromDeviceStatus
       change Changes.TearDownReconciler
 
@@ -165,6 +178,7 @@ defmodule Edgehog.Devices.Device do
       accept [:serial_number, :realm_id]
       argument :device_id, :string, allow_nil?: false
 
+      change Changes.EmitFleetTelemetry
       change Changes.InitializeFromDeviceStatus
 
       # Only if created
@@ -184,6 +198,7 @@ defmodule Edgehog.Devices.Device do
       accept [:part_number, :realm_id]
       argument :device_id, :string, allow_nil?: false
 
+      change Changes.EmitFleetTelemetry
       change Changes.InitializeFromDeviceStatus
 
       # Only if created
@@ -203,6 +218,7 @@ defmodule Edgehog.Devices.Device do
       accept [:realm_id]
       argument :device_id, :string, allow_nil?: false
 
+      change Changes.EmitFleetTelemetry
       change Changes.InitializeFromDeviceStatus
 
       # Only if created
@@ -225,6 +241,7 @@ defmodule Edgehog.Devices.Device do
       argument :device_id, :string, allow_nil?: false
       argument :connected, :boolean, allow_nil?: false
 
+      change Changes.EmitFleetTelemetry
       change Changes.InitializeFromDeviceStatus
 
       # Only if created
@@ -331,7 +348,10 @@ defmodule Edgehog.Devices.Device do
     end
 
     update :from_device_status do
+      require_atomic? false
       accept [:online, :last_connection, :last_disconnection, :last_seen_ip]
+
+      change Changes.EmitFleetTelemetry
     end
 
     update :set_led_behavior do
