@@ -87,6 +87,7 @@ defmodule Edgehog.PromEx do
       Plugins.Absinthe,
       # Plugins.Broadway,
 
+      Edgehog.Campaigns.PromExPlugin,
       Edgehog.Containers.PromExPlugin,
       Edgehog.Files.PromExPlugin,
       Edgehog.Devices.PromExPlugin

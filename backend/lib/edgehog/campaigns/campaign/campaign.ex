@@ -170,12 +170,15 @@ defmodule Edgehog.Campaigns.Campaign do
     end
 
     update :mark_as_in_progress do
+      require_atomic? false
+
       argument :start_timestamp, :utc_datetime_usec do
         default &DateTime.utc_now/0
       end
 
       change set_attribute(:start_timestamp, arg(:start_timestamp))
       change set_attribute(:status, :in_progress)
+      change Changes.EmitStartedTelemetry
     end
 
     update :mark_as_failed do

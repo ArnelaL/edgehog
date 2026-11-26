@@ -61,6 +61,25 @@ Low-cardinality labels (`tenant_slug`, `resource_type`, `result`, `reason`,
 dashboards per device or deployment, set the corresponding option to `false` to
 keep cardinality low.
 
+## Campaign metrics
+
+When a campaign starts, Edgehog emits
+`[:edgehog, :campaigns, :campaign, :started]` and exposes these counters,
+labelled by `tenant_slug` and `mechanism_type`:
+
+| Metric                                               | Meaning                                              |
+| ---------------------------------------------------- | ---------------------------------------------------- |
+| `edgehog_campaigns_started_total`                    | Number of started campaigns                          |
+| `edgehog_campaigns_targets_total`                    | Sum of the number of targets                         |
+| `edgehog_campaigns_max_in_progress_operations_total` | Sum of `max_in_progress_operations` (active targets) |
+| `edgehog_campaigns_target_groups_total`              | Sum of the device groups targeted                    |
+| `edgehog_campaigns_max_retries_total`                | Sum of `request_retries`                             |
+| `edgehog_campaigns_max_failure_percentage_total`     | Sum of `max_failure_percentage` (whole percent)      |
+
+The configuration metrics are sums, so divide by `edgehog_campaigns_started_total`
+to get an average.
+The event metadata also carries `request_retries` and `request_timeout_seconds`.
+
 ## Grafana dashboards
 
 PromEx uploads its built-in dashboards for the application, BEAM, Phoenix, Ecto,
