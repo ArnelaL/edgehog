@@ -30,6 +30,7 @@ defmodule Edgehog.Containers.Image.Deployment do
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Image.Deployment.Changes
   alias Edgehog.Containers.Image.Deployment.Types
+  alias Edgehog.Containers.Image.Deployment.Validations, as: DeploymentValidations
   alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Containers.Validations
   alias Edgehog.Devices.Device
@@ -60,6 +61,8 @@ defmodule Edgehog.Containers.Image.Deployment do
         constraints instance_of: Device
         allow_nil? false
       end
+
+      validate DeploymentValidations.ImageFromAllowedRegistry
 
       change set_attribute(:state, :created)
       change manage_relationship(:image, type: :append)

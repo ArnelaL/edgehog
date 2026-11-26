@@ -279,5 +279,96 @@ defmodule Edgehog.Containers.Image.DeploymentTest do
 
       assert reloaded_deployed_image.credentials.password == credentials.password
     end
+
+    test "fails if registry_host is not in the list of allowed registries, tenant has enforce_allowed_registries enabled",
+         %{tenant: tenant} do
+      image = image_fixture(registry_host: "not.allowed.com", tenant: tenant)
+
+      _allowed_registry =
+        Ash.create!(Edgehog.Containers.AllowedRegistry, %{registry: "allowed.example.com"},
+          tenant: tenant
+        )
+
+      changeset =
+        Ash.Changeset.for_update(tenant, :update_config, %{
+          config: %{enforce_allowed_registries: true}
+        })
+
+      tenant = Ash.update!(changeset)
+
+      release =
+        release_fixture(tenant: tenant, containers: 1, container_params: [image: image])
+
+      device = device_fixture(tenant: tenant)
+
+      assert_raise Ash.Error.Invalid,
+                   ~r/Registry host .* is not in the list of allowed registries/,
+                   fn ->
+                     deployment_fixture(
+                       tenant: tenant,
+                       device_id: device.id,
+                       release_id: release.id
+                     )
+                   end
+    end
+
+    test "fails if registry_host is not set, tenant has enforce_allowed_registries enabled", %{
+      tenant: tenant,
+      image: image
+    } do
+      _allowed_registry =
+        Ash.create!(Edgehog.Containers.AllowedRegistry, %{registry: "allowed.example.com"},
+          tenant: tenant
+        )
+
+      changeset =
+        Ash.Changeset.for_update(tenant, :update_config, %{
+          config: %{enforce_allowed_registries: true}
+        })
+
+      tenant = Ash.update!(changeset)
+
+      release =
+        release_fixture(tenant: tenant, containers: 1, container_params: [image: image])
+
+      device = device_fixture(tenant: tenant)
+
+      assert_raise Ash.Error.Invalid,
+                   ~r/Registry host is not set for the image, and the tenant has enforce_allowed_registries enabled./,
+                   fn ->
+                     deployment_fixture(
+                       tenant: tenant,
+                       device_id: device.id,
+                       release_id: release.id
+                     )
+                   end
+    end
+
+    test "succeeds if registry_host is in the list of allowed registries, tenant has enforce_allowed_registries enabled",
+         %{tenant: tenant} do
+      image = image_fixture(registry_host: "allowed.example.com", tenant: tenant)
+
+      _allowed_registry =
+        Ash.create!(Edgehog.Containers.AllowedRegistry, %{registry: image.registry_host},
+          tenant: tenant
+        )
+
+      changeset =
+        Ash.Changeset.for_update(tenant, :update_config, %{
+          config: %{enforce_allowed_registries: true}
+        })
+
+      tenant = Ash.update!(changeset)
+
+      release =
+        release_fixture(tenant: tenant, containers: 1, container_params: [image: image])
+
+      device = device_fixture(tenant: tenant)
+
+      deployment =
+        deployment_fixture(tenant: tenant, device_id: device.id, release_id: release.id)
+
+      assert deployment.state == :pending
+    end
   end
 end

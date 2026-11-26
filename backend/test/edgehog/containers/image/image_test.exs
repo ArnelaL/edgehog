@@ -217,6 +217,82 @@ defmodule Edgehog.Containers.ImageTest do
                |> Ash.Changeset.for_create(:create, params, tenant: tenant)
                |> Ash.create()
     end
+
+    test "fails if registry_host is not in the list of allowed registries, tenant has enforce_allowed_registries enabled",
+         %{tenant: tenant} do
+      tenant =
+        Ash.Changeset.for_update(tenant, :update_config, %{
+          config: %{enforce_allowed_registries: true}
+        })
+
+      {:ok, tenant} = Ash.update(tenant)
+
+      params = %{
+        registry_host: "not-allowed.example.com",
+        image: unique_image_name()
+      }
+
+      assert {:error, %Ash.Error.Invalid{} = error} =
+               Image
+               |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+               |> Ash.create()
+
+      assert Enum.any?(error.errors, fn err ->
+               err.field == :registry_host and
+                 err.message ==
+                   "Registry host not-allowed.example.com is not in the list of allowed registries."
+             end)
+    end
+
+    test "fails if registry_host is not set and tenant has enforce_allowed_registries enabled",
+         %{tenant: tenant} do
+      changeset =
+        Ash.Changeset.for_update(tenant, :update_config, %{
+          config: %{enforce_allowed_registries: true}
+        })
+
+      tenant = Ash.update!(changeset)
+
+      assert {:error, %Ash.Error.Invalid{} = error} =
+               Image
+               |> Ash.Changeset.for_create(
+                 :create,
+                 %{image: unique_image_name()},
+                 tenant: tenant
+               )
+               |> Ash.create()
+
+      assert Enum.any?(error.errors, fn err ->
+               err.field == :registry_host and
+                 err.message ==
+                   "Registry host is not set for the image, and the tenant has enforce_allowed_registries enabled."
+             end)
+    end
+
+    test "succeeds if registry_host is in the list of allowed registries, tenant has enforce_allowed_registries enabled",
+         %{tenant: tenant} do
+      _allowed_registry =
+        Ash.create!(Edgehog.Containers.AllowedRegistry, %{registry: "allowed.example.com"},
+          tenant: tenant
+        )
+
+      tenant =
+        Ash.Changeset.for_update(tenant, :update_config, %{
+          config: %{enforce_allowed_registries: true}
+        })
+
+      {:ok, tenant} = Ash.update(tenant)
+
+      params = %{
+        registry_host: "allowed.example.com",
+        image: unique_image_name()
+      }
+
+      assert {:ok, %Image{}} =
+               Image
+               |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+               |> Ash.create()
+    end
   end
 
   describe "container_fixture/1 image pass-down" do

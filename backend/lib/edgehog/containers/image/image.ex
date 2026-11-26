@@ -27,6 +27,7 @@ defmodule Edgehog.Containers.Image do
   alias Edgehog.Containers.Changes
   alias Edgehog.Containers.Container
   alias Edgehog.Containers.Image
+  alias Edgehog.Containers.Image.Validations, as: ImageValidations
   alias Edgehog.Containers.ImageCredentials
   alias Edgehog.Containers.Validations
 
@@ -144,6 +145,8 @@ defmodule Edgehog.Containers.Image do
     validate present(:registry_host),
       where: [present(:registry_port)],
       message: "must be present when registry_port is set"
+
+    validate ImageValidations.Registry
   end
 
   preparations do
