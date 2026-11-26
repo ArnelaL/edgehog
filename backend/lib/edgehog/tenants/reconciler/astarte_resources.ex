@@ -17,14 +17,30 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Edgehog.Tenants.Reconciler.AstarteResources do
-  @moduledoc false
-  @interfaces Path.wildcard("priv/astarte_resources/interfaces/majors/*.json")
-  @delivery_policies Path.wildcard("priv/astarte_resources/delivery_policies/*.json.eex")
-  @trigger_templates Path.wildcard("priv/astarte_resources/trigger_templates/*.json.eex")
+  @moduledoc """
+  Elixir representation of astarte resources
 
-  # Ensure we recompile code if trigger templates or interfaces change
-  for resource <- @interfaces ++ @delivery_policies ++ @trigger_templates do
-    @external_resource resource
+  The module loads the resources in the appropriate folders and loads them into
+  standard elixir data structures.
+  """
+
+  @interfaces_glob "priv/astarte_resources/interfaces/majors/*.json"
+  @delivery_policies_glob "priv/astarte_resources/delivery_policies/*.json.eex"
+  @triggers_glob "priv/astarte_resources/trigger_templates/*.json.eex"
+
+  @interfaces Path.wildcard(@interfaces_glob)
+  @delivery_policies Path.wildcard(@delivery_policies_glob)
+  @trigger_templates Path.wildcard(@triggers_glob)
+
+  @resources_hash :erlang.md5(@interfaces ++ @delivery_policies ++ @trigger_templates)
+
+  def __mix_recompile__? do
+    current =
+      Path.wildcard(@interfaces_glob) ++
+        Path.wildcard(@delivery_policies_glob) ++
+        Path.wildcard(@triggers_glob)
+
+    :erlang.md5(current) != @resources_hash
   end
 
   def load_interfaces do
